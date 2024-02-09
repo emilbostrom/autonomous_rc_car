@@ -5,6 +5,15 @@
 bool exitLoop = false; // Flag to indicate whether to exit the loop
 
 int main() {
+    // Add this line at the beginning of main()
+    XSetErrorHandler([](Display* display, XErrorEvent* errorEvent) {
+        char errorText[256];
+        XGetErrorText(display, errorEvent->error_code, errorText, sizeof(errorText));
+        std::cerr << "X11 Error: " << errorText << std::endl;
+        return 0;
+    });
+
+
     Display* display = XOpenDisplay(NULL);
     if (display == NULL) {
         std::cerr << "Error: Unable to open display." << std::endl;
