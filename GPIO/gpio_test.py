@@ -3,8 +3,11 @@
 import rospy
 from std_msgs.msg import Bool
 import RPi.GPIO as GPIO
+import time
 
 BUTTON_GPIO = 16
+MOTOR_PWM_PIN = 21
+MOTOR_ENABLE_PIN = 25
 
 if __name__ == '__main__':
     rospy.init_node('button_state_publisher')
@@ -12,7 +15,23 @@ if __name__ == '__main__':
     pub = rospy.Publisher('button_state', Bool, queue_size = 10)
 
     GPIO.setmode(GPIO.BCM)
+
+    GPIO.output(MOTOR_ENABLE_PIN, GPIO.HIGH)
+
+    dc = 50
+    freq = 2e3
+    p = GPIO.PWM(MOTOR_PWM_PIN, freq)
+    p.ChangeDutyCycle(dc)  # where 0.0 <= dc <= 100.0
+    # p.ChangeFrequency(freq)   # where freq is the new frequency in Hz
+
+    p.start(dc)   # where dc is the duty cycle (0.0 <= dc <= 100.0)
+
+    time.sleep(5)
+
+    p.stop()
+
     GPIO.setup(BUTTON_GPIO, GPIO.IN, pull_up_down = GPIO.PUD_UP)
+
 
     rate = rospy.Rate(10)
 
