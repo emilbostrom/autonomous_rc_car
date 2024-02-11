@@ -6,8 +6,10 @@ import RPi.GPIO as GPIO
 import time
 
 BUTTON_GPIO = 16
-MOTOR_PWM_PIN = 21
+MOTOR_PWM_1_PIN = 21
+MOTOR_PWM_2_PIN = 18
 MOTOR_ENABLE_PIN = 25
+DC_MOTOR_OFF = 0
 
 if __name__ == '__main__':
     rospy.init_node('button_state_publisher')
@@ -20,15 +22,21 @@ if __name__ == '__main__':
 
     dc = 50
     freq = 2e3
-    p = GPIO.PWM(MOTOR_PWM_PIN, freq)
-    p.ChangeDutyCycle(dc)  # where 0.0 <= dc <= 100.0
+    pwm_1 = GPIO.PWM(MOTOR_PWM_1_PIN, freq)
+
+    pwm_2 = GPIO.PWM(MOTOR_PWM_2_PIN, freq)
     # p.ChangeFrequency(freq)   # where freq is the new frequency in Hz
 
-    p.start(dc)   # where dc is the duty cycle (0.0 <= dc <= 100.0)
+    pwm_1.start(dc)   # where dc is the duty cycle (0.0 <= dc <= 100.0)
+    pwm_2.start(DC_MOTOR_OFF)
 
     time.sleep(5)
 
-    p.stop()
+    pwm_1.ChangeDutyCycle(DC_MOTOR_OFF)  
+    pwm_2.ChangeDutyCycle(dc)
+
+    pwm_1.stop()
+    pwm_2.stop()
 
     GPIO.setup(BUTTON_GPIO, GPIO.IN, pull_up_down = GPIO.PUD_UP)
 
