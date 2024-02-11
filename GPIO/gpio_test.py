@@ -18,12 +18,17 @@ if __name__ == '__main__':
 
     GPIO.setmode(GPIO.BCM)
 
+    GPIO.setup(MOTOR_ENABLE_PIN, GPIO.OUT)
     GPIO.output(MOTOR_ENABLE_PIN, GPIO.HIGH)
+
+    time.sleep(10)
 
     dc = 50
     freq = 2e3
+    GPIO.setup(MOTOR_PWM_1_PIN, GPIO.OUT)
     pwm_1 = GPIO.PWM(MOTOR_PWM_1_PIN, freq)
 
+    GPIO.setup(MOTOR_PWM_2_PIN, GPIO.OUT)
     pwm_2 = GPIO.PWM(MOTOR_PWM_2_PIN, freq)
     # p.ChangeFrequency(freq)   # where freq is the new frequency in Hz
 
