@@ -1,6 +1,7 @@
-import tty
 import sys
 import termios
+import tty
+import select
 
 # Dictionary mapping keys to actions
 key_actions = {
@@ -19,20 +20,13 @@ def main():
 
     try:
         while True:
-            key = read_key()
-            if key:
+            if select.select([sys.stdin], [], [], 0)[0]:  # Check if there's input available
+                key = sys.stdin.read(1)
                 handle_key(key)
     except KeyboardInterrupt:
         pass
     finally:
         termios.tcsetattr(sys.stdin, termios.TCSADRAIN, orig_settings)
-
-def read_key():
-    # Non-blocking read from stdin
-    try:
-        return sys.stdin.read(1)
-    except IOError:
-        return None
 
 def handle_key(key):
     if key in key_actions:
