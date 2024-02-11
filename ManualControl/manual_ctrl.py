@@ -1,10 +1,21 @@
-import keyboard
+import curses
 
-def on_key_event(event):
-    print(f"Key {event.name} {'pressed' if event.event_type == 'down' else 'released'}")
+def main(stdscr):
+    # Clear screen
+    stdscr.clear()
+    # Turn off echoing of keys, and enter cbreak mode,
+    # where no buffering is performed on keyboard input
+    curses.cbreak()
+    stdscr.keypad(True)
 
-# Subscribe to key events
-keyboard.hook(on_key_event)
+    while True:
+        # Get the user's input
+        c = stdscr.getch()
+        stdscr.addch(c)
+        stdscr.refresh()
+        # Exit on 'q' key
+        if c == ord('q'):
+            break
 
-# Block the program from exiting
-keyboard.wait('esc')
+# Run the application
+curses.wrapper(main)
