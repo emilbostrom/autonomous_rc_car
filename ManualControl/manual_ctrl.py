@@ -12,22 +12,25 @@ def on_axis_moved(axis):
 try:
     with Xbox360Controller(0, axis_threshold=0.2) as controller:
         controller.info()
-
-        while True:
-            print(controller.axis_l.x)
-            print(controller.axis_l.y)
-
-            #ser = serial.Serial('/dev/cu.usbserial-0001')  # open serial port
-            #ser.baudrate = 115200
-            #command = b"M50"        # Command to send
-            #ser.write(command)      # write to ESP32
-
-            #ser.close()             # close por
-
-        # Left and right axis move event
-        # controller.axis_l.when_moved = on_axis_moved
-        # controller.axis_r.when_moved = on_axis_moved
         
-        signal.pause()
+        ser = serial.Serial('/dev/ttyUSB0')  # open serial port
+        ser.baudrate = 115200
+        
+        while True:
+            steering_reference =controller.axis_l.x
+            motor_reference = controller.axis_l.y
+
+            print(steering_reference)
+            print(motor_reference)
+            
+            steering_command = "S" + str(steering_reference)
+            ser.write(steering_command.encode())      # write to ESP32
+
+            motor_command = "M" + str(motor_reference)
+            ser.write(motor_command.encode())      # write to ESP32            
+
+        
+        ser.close()             # close por
+        
 except KeyboardInterrupt:
     pass
