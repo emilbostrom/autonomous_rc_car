@@ -1,16 +1,6 @@
 import signal
 from xbox360controller import Xbox360Controller
-
-
-def on_button_pressed(button):
-    print(button)
-    print('Button {0} was pressed'.format(button.name))
-
-
-def on_button_released(button):
-    print(button)
-    print('Button {0} was released'.format(button.name))
-
+import serial
 
 def on_axis_moved(axis):
     print(axis)
@@ -22,17 +12,20 @@ def on_axis_moved(axis):
 try:
     with Xbox360Controller(0, axis_threshold=0.2) as controller:
         controller.info()
-          
-        # Button A events
-        controller.button_a.when_pressed = on_button_pressed
-        controller.button_a.when_released = on_button_released
-                
-        # Left and right axis move event
-        controller.axis_l.when_moved = on_axis_moved
-        controller.axis_r.when_moved = on_axis_moved
 
-        controller.trigger_l.when_moved = on_axis_moved
-        controller.trigger_r.when_moved = on_axis_moved
+        print(controller.axis_l._value_x)
+        print(controller.axis_l._value_y)
+
+        ser = serial.Serial('/dev/cu.usbserial-0001')  # open serial port
+        ser.baudrate = 115200
+        command = b"M50"        # Command to send
+        ser.write(command)      # write to ESP32
+
+        ser.close()             # close por
+
+        # Left and right axis move event
+        # controller.axis_l.when_moved = on_axis_moved
+        # controller.axis_r.when_moved = on_axis_moved
         
         signal.pause()
 except KeyboardInterrupt:
