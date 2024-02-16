@@ -19,15 +19,14 @@ try:
         while True:
             steering_reference =controller.axis_l.x
             motor_reference = controller.axis_l.y
-
-            print(steering_reference)
-            print(motor_reference)
             
             steering_command = "S" + str(steering_reference)
             ser.write(steering_command.encode())      # write to ESP32
+            print(steering_command)
 
             motor_command = "M" + str(motor_reference)
-            ser.write(motor_command.encode())      # write to ESP32            
+            ser.write(motor_command.encode())      # write to ESP32 
+            print(motor_reference)           
 
         
         ser.close()             # close por
