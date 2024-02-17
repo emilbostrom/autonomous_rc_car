@@ -19,6 +19,7 @@ try:
         while True:
             steering_reference =controller.axis_l.x
             motor_reference = controller.axis_l.y
+            motor_reference if motor_reference > 0.1 else 0
             
             steering_command = "S" + str(steering_reference)
             ser.write(steering_command.encode())      # write to ESP32
@@ -26,7 +27,7 @@ try:
 
             motor_command = "M" + str(motor_reference)
             ser.write(motor_command.encode())      # write to ESP32 
-            print(motor_reference)           
+            print(motor_command)           
 
         
         ser.close()             # close por
