@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<head>
+    <title>PiCam Server</title>
+    <link rel="stylesheet" href='style.css'/>
+</head>
+<body>
+    
+        <h1>PiCam Live Streaming</h1>
+        
+        <div class="img-container">
+            <img src="{{ url_for('video_feed') }}">
+        </div>
+        <footer>AranaCorp All right reserved &#169;</footer>
+        
+</body>
+</html>
