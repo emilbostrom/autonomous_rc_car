@@ -17,7 +17,7 @@ try:
         ser.baudrate = 115200
         
         while True:
-            steering_reference =controller.axis_l.x
+            steering_reference =controller.axis_r.x
             motor_reference = controller.axis_l.y
             motor_reference = motor_reference if abs(motor_reference) > 0.1 else 0
             

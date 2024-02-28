@@ -56,10 +56,9 @@ void setup() {
 
 
 void setMotorSpeed(float motorCommand) {
-  const int minMotorSpeed = 600; // 0 to 1023
-  const int maxMotorSpeed = 700; // out of 1023. But ESC does not want over 98%
+  const int minMotorSpeed = 550; // 0 to 1023
+  const int maxMotorSpeed = 650; // out of 1023. But ESC does not want over 98%
   int motorDutyCycle;
-  int direction;
 
   // Scale motorCommand to duty cycle
   if (abs(motorCommand) > 0.0) {
@@ -88,7 +87,55 @@ void setMotorSpeed(float motorCommand) {
   }
 
   ledcWrite(motorPwmChannel, motorDutyCycle); // Set new duty cycle
+}
+
+
+void setServoPosition(float servoCommand) {
+  int motorDutyCycle;
+
+  // Set direction by enabling correct pin
+  if (servoCommand > 0) {
+    digitalWrite(servoRightPin, HIGH);
+    digitalWrite(servoLeftPin, LOW);
+    Serial.println("Servo going right");
+  }
+  else if (servoCommand < 0) {
+    digitalWrite(servoRightPin, LOW);
+    digitalWrite(servoLeftPin, HIGH);
+    Serial.println("Servo going left");
+  }
+  else {
+    digitalWrite(servoRightPin, LOW);
+    digitalWrite(servoLeftPin, LOW);
+  }
+  Serial.println(abs(servoCommand));
   
+  ledcWrite(servoPwmChannel, abs(servoCommand)); // Set new duty cycle
+}
+
+float getServoError(float command) {
+
+  // Middle 1460
+  const int minPosition = 1180;
+  const int maxPosition = 1530;
+
+  // variable for storing the potentiometer value
+  int potentiometerValue = 0;
+  // Reading potentiometer value
+  potentiometerValue = analogRead(readPotentiometerPin);
+
+  Serial.println(abs(potentiometerValue));
+
+  int m = 1355;
+  float k = 175;
+
+  float potentiometerValueScaled = constrain(float(potentiometerValue - m)/k,-1,1);
+
+  float servoError = command - potentiometerValueScaled;
+
+  // PID CONTROLLER
+  float p = 800;
+  return constrain(p * servoError,-1000,1000);
 }
 
 void loop() {
@@ -107,18 +154,14 @@ void loop() {
       // Read the motor speed
     // Do something with the motor speed
     setMotorSpeed(command);
-    Serial.print("Received Motor Command: ");
-    Serial.println(command);
+    //Serial.print("Received Motor Command: ");
+    //Serial.println(command);
   } 
   else if (messageType == SERVO_CONTROL_MSG) {
     // Do something with the servo angle
-    Serial.print("Received Servo Reference: ");
-    Serial.println(command);
+    //Serial.print("Received Servo Reference: ");
+    //Serial.println(command);
+    float servoCommand = getServoError(command);
+    setServoPosition(servoCommand);
   } 
-
-  // variable for storing the potentiometer value
-  int potentiometerValue = 0;
-  // Reading potentiometer value
-  potentiometerValue = analogRead(readPotentiometerPin);
-  //Serial.println(potentiometerValue);
 }
