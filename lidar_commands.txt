@@ -1,0 +1,15 @@
+roslaunch rplidar_ros rplidar_c1.launch
+
+# New map
+roslaunch hector_slam_launch tutorial.launch
+
+
+# Save map
+rosrun map_server map_saver -f my_map
+
+# Load map
+rosrun map_server map_server catkin_ws/maps/my_map.yaml
+roslaunch hector_slam_launch tutorial.launch
+
+# Slam settings
+~/catkin_ws/src/hector_slam/hector_mapping/launch/mapping_default.launch
