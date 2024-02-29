@@ -17,7 +17,7 @@ double x_goal = 5;
 double y_goal = 5;
 double z_goal = 0;
 double x_quat_goal = 0.707;
-double y_quat_goal = 0
+double y_quat_goal = 0;
 double z_quat_goal = 0;
 double w_quat_goal = 0.707;
 
