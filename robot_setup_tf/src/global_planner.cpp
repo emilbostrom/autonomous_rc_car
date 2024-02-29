@@ -1,6 +1,16 @@
 #include <ros/ros.h>
 #include <geometry_msgs/PoseStamped.h>
 
+std::vector<geometry_msgs::PoseStamped::ConstPtr> pose;
+
+double x_current = 0;
+double y_current = 0;
+double z_current = 0;
+double x_quat = 0;
+double y_quat = 0;
+double z_quat = 0;
+double w_quat = 0;
+
 void positionSubscriber(const geometry_msgs::PoseStamped::ConstPtr& msg) {
     ROS_INFO_STREAM("Received pose: " << msg);
     x_current = msg->pose.position.x;
