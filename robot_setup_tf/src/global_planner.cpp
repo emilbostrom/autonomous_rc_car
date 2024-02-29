@@ -45,12 +45,12 @@ int main(int argc, char** argv) {
     ros::init(argc,argv, "global_planner");
     ros::NodeHandle n;
 
+    ros::Subscriber sub = n.subscribe("slam_out_pose",1000,positionSubscriber);
+    ros::Publisher pub = n.advertise<geometry_msgs::PoseStamped>("goal_position",10);
+
     ros::Rate r(10); // 10 hz
-    while (should_continue)
+    while (ros::ok())
     {
-        ros::Subscriber sub = n.subscribe("slam_out_pose",1000,positionSubscriber);
-        
-        ros::Publisher pub = n.advertise<geometry_msgs::PoseStamped("goal_position",10);
         
         geometry_msgs::PoseStamped goal_pos_msg;
         goal_pos_msg.pose.position.x = x_goal;
