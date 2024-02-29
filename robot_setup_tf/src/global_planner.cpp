@@ -1,5 +1,7 @@
 #include <ros/ros.h>
 #include <geometry_msgs/PoseStamped.h>
+#include <sstream>
+#include <vector>
 
 std::vector<geometry_msgs::PoseStamped::ConstPtr> pose;
 
@@ -35,7 +37,7 @@ int main(int argc, char** argv) {
     ros::init(argc,argv, "listener");
     ros::NodeHandle n;
 
-    ros::Subscriber sub = n.subscribe("chatter",1000,positionSubscriber);
+    ros::Subscriber sub = n.subscribe("slam_out_pose",1000,positionSubscriber);
 
     ros::spin();
     
