@@ -63,7 +63,7 @@ int main(int argc, char** argv) {
         goal_pos_msg.pose.orientation.z = z_quat_goal;
         goal_pos_msg.pose.orientation.w = w_quat_goal;
         
-        geometry_msgs.header.frame_id = frame_id_goal;
+        goal_pos_msg.header.frame_id = frame_id_goal;
 
 
         pub.publish(goal_pos_msg);
