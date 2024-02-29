@@ -2,6 +2,7 @@
 #include <geometry_msgs/PoseStamped.h>
 #include <sstream>
 #include <vector>
+#include <string>
 
 std::vector<geometry_msgs::PoseStamped::ConstPtr> pose;
 
