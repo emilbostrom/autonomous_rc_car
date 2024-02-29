@@ -204,3 +204,7 @@ include_directories(
 
 ## Add folders to be run by python nosetests
 # catkin_add_nosetests(test)
+
+add_executable(global_planner src/talker.cpp)
+target_link_libraries(global_planner ${catkin_LIBRARIES})
+add_dependencies(global_planner roboy_setup_tf)
