@@ -21,6 +21,8 @@ double y_quat_goal = 0;
 double z_quat_goal = 0;
 double w_quat_goal = 0.707;
 
+string frame_id_goal = "map";
+
 void positionSubscriber(const geometry_msgs::PoseStamped::ConstPtr& msg) {
     ROS_INFO_STREAM("Received pose: " << msg);
     x_current = msg->pose.position.x;
@@ -60,6 +62,9 @@ int main(int argc, char** argv) {
         goal_pos_msg.pose.orientation.y = y_quat_goal;
         goal_pos_msg.pose.orientation.z = z_quat_goal;
         goal_pos_msg.pose.orientation.w = w_quat_goal;
+        
+        geometry_msgs.header.frame_id = frame_id_goal;
+
 
         pub.publish(goal_pos_msg);
 
