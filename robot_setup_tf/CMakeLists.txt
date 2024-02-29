@@ -208,4 +208,3 @@ include_directories(include ${catkin_INCLUDE_DIRS})
 
 add_executable(global_planner src/global_planner.cpp)
 target_link_libraries(global_planner ${catkin_LIBRARIES})
-add_dependencies(global_planner robot_setup_tf)
