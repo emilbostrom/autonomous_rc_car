@@ -1,8 +1,8 @@
 #include <ros/ros.h>
 #include <geometry_msgs/PoseStamped.h>
 
-void positionSubscriber(const geometry_msgs::Pose pos) {
-    ROS_INFO("I heard: [%s]", pos->data.c_str());
+void positionSubscriber(const geometry_msgs::PoseStamped::ConstPtr& msg) {
+    ROS_INFO("I heard: [%s]", msg->data.c_str());
 }
 
 int main(int argc, char** argv) {
