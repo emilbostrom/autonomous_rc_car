@@ -64,7 +64,6 @@ class GlobalPlanner{
             
             nav_msgs::Path path;
             std::vector<geometry_msgs::PoseStamped> poses_stamped;
-            poses_stamped.header.frame_id = frame_id_map;
 
             geometry_msgs::PoseStamped pose_stamped;
             pose_stamped.header.frame_id = frame_id_map;
