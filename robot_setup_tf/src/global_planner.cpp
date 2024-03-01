@@ -57,13 +57,13 @@ class GlobalPlanner{
         }
 
         double CalcDistance(double x1, double y1, double x2, double y2) {
-            return sqrt(pow((x2-x1),2),pow((y2-y1),2));
+            return sqrt(pow((x2-x1),2) + pow((y2-y1),2))  ;
         }
 
-        const nav_msgs::Path CreatePath(const geometry_msgs::PoseStamped goal){
+        const nav_msgs::Path CreatePath(){
             
             nav_msgs::Path path;
-            geometry_msgs::PoseStamped[] poses_stamped;
+            std::vector<geometry_msgs::PoseStamped> poses_stamped;
             poses_stamped.frame_id = frame_id_map;
 
             geometry_msgs::PoseStamped pose_stamped;
@@ -111,7 +111,7 @@ int main(int argc, char** argv) {
     ros::init(argc,argv, "global_planner");
     ros::NodeHandle n;
 
-    ros::Subscriber sub = n.subscribe("slam_out_pose",1000,planner.positionSubscriber);
+    ros::Subscriber sub = n.subscribe("slam_out_pose",1000, &GlobalPlanner::positionSubscriber, &planner);
     ros::Publisher pub = n.advertise<nav_msgs::Path>("global_path",10);
 
     ros::Rate r(10); // 10 hz
@@ -129,7 +129,7 @@ int main(int argc, char** argv) {
     
     goal_pos_msg.header.frame_id = planner.frame_id_map;
 
-    nav_msgs::Path path = planner.CreatePath(goal_pos_msg);
+    nav_msgs::Path path = planner.CreatePath();
 
     pub.publish(path);
 
