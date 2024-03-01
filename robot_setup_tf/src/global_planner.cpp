@@ -129,7 +129,7 @@ int main(int argc, char** argv) {
     
     goal_pos_msg.header.frame_id = planner.frame_id_map;
 
-    nav_msgs::Path path = planner.CreatePath(goal_pos_msg)
+    nav_msgs::Path path = planner.CreatePath(goal_pos_msg);
 
     pub.publish(path);
 
