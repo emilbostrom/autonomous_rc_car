@@ -128,11 +128,15 @@ int main(int argc, char** argv) {
     
     goal_pos_msg.header.frame_id = planner.frame_id_map;
 
-    nav_msgs::Path path = planner.CreatePath();
+    while(ros::ok()) {
 
-    pub.publish(path);
+        nav_msgs::Path path = planner.CreatePath();
 
-    ros::spinOnce();
+        pub.publish(path);
+
+        ros::spinOnce();
+        r.sleep();
+    }
 
     
     return 0;
