@@ -53,8 +53,6 @@ class Node{
 
         void FindNearestNode(std::vector<Node> Tree) {
             Node nearestNode = Tree[0];
-            ROS_INFO_STREAM("Start node info: " << nearestNode.id << " x: " << nearestNode.xCell << " y: " << nearestNode.yCell);
-            ROS_INFO_STREAM("Should be same as above: " << Tree[0].id << " xCell: " << Tree[0].xCell << " y: " << Tree[0].yCell);
 
             double nearestDist = calcDistance(xCell,yCell,Tree[0].xCell,Tree[0].yCell);
             ROS_INFO_STREAM("Distance between node and start node: " << nearestDist);
@@ -68,6 +66,8 @@ class Node{
                     nearestDist = dist;
                 }
             }
+
+            ROS_INFO_STREAM("Nearest node to " << id << " is " << nearestNode.id);
 
             this->idParent = nearestNode.id;
 
@@ -161,10 +161,11 @@ class GlobalPlanner{
             int maxIterationsRrt = 1000;
             for(int iRrt  = 1; iRrt < maxIterationsRrt; iRrt++) {
                 Node newNode(widthGenerator(rng),heightGenerator(rng),iRrt,stepLength);
-                ROS_INFO_STREAM("New node generated: " << newNode.id << " x: " << newNode.xCell << " y: " << newNode.yCell);
                 
                 newNode.FindNearestNode(Tree);
                 Tree.push_back(newNode);
+
+                ROS_INFO_STREAM("Added new node to tree: " << newNode.id << " xPos: " << newNode.xPos << " yPos: " << newNode.yPos);
                 
                 pose.position.x = newNode.xPos;
                 pose.position.y = newNode.yPos;
