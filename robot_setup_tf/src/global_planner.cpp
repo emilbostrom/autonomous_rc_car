@@ -9,6 +9,7 @@
 #include <iostream>
 #include <cmath>
 #include <random>
+#include <algorithm> 
 
 
 double xGoal = 5;
@@ -53,7 +54,7 @@ class Node{
         }
 
         double calcDistance(double x1, double y1, double x2, double y2) {
-            return sqrt(pow((x2-x1),2) + pow((y2-y1),2));
+            return std::min(sqrt(pow((x2-x1),2) + pow((y2-y1),2)),0.001);
         }
 
         void FindNearestNode(std::vector<Node> Tree) {
@@ -175,6 +176,8 @@ class GlobalPlanner{
                 pose.position.x = newNode.xPos;
                 pose.position.y = newNode.yPos;
                 pose.position.z = 0;
+
+                if (newNode.xPos)
 
                 pose.orientation.x = 0.924;
                 pose.orientation.y = 0;
