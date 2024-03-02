@@ -62,6 +62,7 @@ class GlobalPlanner{
             mapWidth = mapMetaMsg->width*mapResolution;
             mapHeight = mapMetaMsg->height*mapResolution;
 
+            ROS_INFO_STREAM("Map resolution: " << mapResolution);
             ROS_INFO_STREAM("Map width: " << mapWidth);
             ROS_INFO_STREAM("Map height: " << mapHeight);
             
