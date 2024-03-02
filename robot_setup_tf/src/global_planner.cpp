@@ -31,10 +31,10 @@ class Node{
         int idParent;
         int cost;
         
-        Node(int x, int y, int id){
-            ROS_INFO_STREAM("Node id: " << id);
-            ROS_INFO_STREAM("Width generated: " << x);
-            ROS_INFO_STREAM("Height generated: " << y);
+        Node(int x, int y, int id) : x(x), y(y), id(id){
+            ROS_INFO_STREAM("Node id: " << this->id);
+            ROS_INFO_STREAM("Width generated: " << this->x);
+            ROS_INFO_STREAM("Height generated: " << this->y);
         }
 
         double calcDistance(double x1, double y1, double x2, double y2) {
@@ -148,10 +148,10 @@ class GlobalPlanner{
 
             int maxIterationsRrt = 1000;
             for(int iRrt  = 1; iRrt < maxIterationsRrt; iRrt++) {
-                Node node(widthGenerator(rng),heightGenerator(rng),iRrt);
-                ROS_INFO_STREAM("New node generated: " << node.id << " x: " << node.x << " y: " << node.y);
+                Node newNode(widthGenerator(rng),heightGenerator(rng),iRrt);
+                ROS_INFO_STREAM("New node generated: " << newNode.id << " x: " << newNode.x << " y: " << newNode.y);
                 
-                Node nearestNode = node.FindNearestNode(Tree);
+                Node nearestNode = newNode.FindNearestNode(Tree);
                 Tree.push_back(nearestNode);
                 ROS_INFO_STREAM("New node added to tree: " << nearestNode.id << " x: " << nearestNode.x << " y: " << nearestNode.y);
                 
