@@ -8,6 +8,7 @@
 #include <string>
 #include <iostream>
 #include <cmath>
+#include <random>
 
 
 double xGoal = 5;
@@ -25,8 +26,11 @@ std::vector<geometry_msgs::PoseStamped::ConstPtr> pose;
 class GlobalPlanner{
     public:
         std::string frameIdMap = "map";
-        double stepLength = 0.1;
-        double goalDistThreshold = stepLength*2;
+        double mapResulution; // [m/cell]
+        int mapWidth; // [m]
+        int mapHeight; // [m]
+        double stepLength; // [m]
+        double goalDistThreshold; // [m]
 
         double xCurrent;
         double yCurrent;
@@ -36,23 +40,34 @@ class GlobalPlanner{
         double zQuat;
         double wQuat;
 
-        void initialPosition(const geometry_msgs::PoseStamped::ConstPtr& msg) {
-            ROS_INFO_STREAM("Received pose: " << msg);
-            xCurrent = msg->pose.position.x;
-            yCurrent = msg->pose.position.y;
-            zCurrent = msg->pose.position.z;
-            xQuat = msg->pose.orientation.x;
-            yQuat = msg->pose.orientation.y;
-            zQuat = msg->pose.orientation.z;
-            wQuat = msg->pose.orientation.w;
+        typedef std::mt19937 MyRNG;
+        MyRNG rng;
+        uint32_t seed_val;
+        rng.seed(seed_val);
 
-            ROS_INFO_STREAM(xCurrent);
-            ROS_INFO_STREAM(yCurrent);
-            ROS_INFO_STREAM(zCurrent);
-            ROS_INFO_STREAM(xQuat);
-            ROS_INFO_STREAM(yQuat);
-            ROS_INFO_STREAM(zQuat);
-            ROS_INFO_STREAM(wQuat);
+        std::uniform_int_distribution<uint32_t> widthGenerator;
+        std::uniform_int_distribution<uint32_t> heightGenerator;
+
+        GlobalPlanner(const geometry_msgs::PoseStamped::ConstPtr& poseMsg, 
+                      const geometry_msgs::MapMetaDataConstPtr& mapMetaMsg) {
+            
+            ROS_INFO_STREAM("Received pose: " << poseMsg);
+            xCurrent = poseMsg->pose.position.x;
+            yCurrent = poseMsg->pose.position.y;
+            zCurrent = poseMsg->pose.position.z;
+            xQuat = poseMsg->pose.orientation.x;
+            yQuat = poseMsg->pose.orientation.y;
+            zQuat = poseMsg->pose.orientation.z;
+            wQuat = poseMsg->pose.orientation.w;
+
+            mapResulution = mapMetaMsg.resolution;
+            mapWidth = mapMetaMsg.width*mapResulution;
+            mapHeight = mapMetaMsg.height*mapResulution;
+            widthGenerator.param(0,mapWidth);
+            heightGenerator.param(0,mapHeight);
+
+            stepLength = mapResulution*2;
+            goalDistThreshold = stepLength*2;
         }
 
         double calcDistance(double x1, double y1, double x2, double y2) {
@@ -75,6 +90,9 @@ class GlobalPlanner{
             double distToGoal = calcDistance(xPathPos,yPathPos,xGoal,yGoal);
 
             while(distToGoal > goalDistThreshold) {
+                ROS_INFO_STREAM("Width generated: " << widthGenerator(rng));
+                ROS_INFO_STREAM("Height generated: " << heightGenerator(rng));
+                
                 xPathPos += stepLength;
                 yPathPos += stepLength;
                 
@@ -104,17 +122,21 @@ class GlobalPlanner{
 
 int main(int argc, char** argv) {
 
-    GlobalPlanner planner;
-
     ros::init(argc,argv, "global_planner");
     ros::NodeHandle n;
     
     boost::shared_ptr<geometry_msgs::PoseStamped const> iniPosMsg;
-    iniPosMsg = ros::topic::waitForMessage<geometry_msgs::PoseStamped>("slam_out_pose",ros::Duration(10.0));
+    iniPosMsg = ros::topic::waitForMessage<geometry_msgs::PoseStamped>("slam_out_pose",ros::Duration(2.0));
 
-    planner.initialPosition(iniPosMsg);
+    boost::shared_ptr<nav_msgs::MapMetaData const> mapMetaData;
+    mapMetaData = ros::topic::waitForMessage<geometry_msgs::MapMetaData>("map_metadata",ros::Duration(2.0));
 
-    //ros::Subscriber sub = n.subscribe("slam_out_pose",1000, &GlobalPlanner::positionSubscriber, &planner);
+    GlobalPlanner planner(iniPosMsg,mapMetaData);
+
+    boost::shared_ptr<nav_msgs::OccupancyGrid const> mapData;
+    mapData = ros::topic::waitForMessage<geometry_msgs::OccupancyGrid>("map",ros::Duration(2.0));
+
+
     ros::Publisher pub = n.advertise<nav_msgs::Path>("global_path",10);
 
     ros::Rate r(10); // 10 hz
