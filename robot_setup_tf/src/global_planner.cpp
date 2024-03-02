@@ -32,8 +32,8 @@ class Node{
         int cost;
         int stepLength;
 
-        double xPos;
-        double yPos;
+        double xPos = 0;
+        double yPos = 0;
         
         Node(int xCell, int yCell, int id, int stepLength) : xCell(xCell), yCell(yCell), id(id), stepLength(stepLength){
             ROS_INFO_STREAM("Node id: " << this->id);
@@ -45,8 +45,11 @@ class Node{
             double pointDistance = calcDistance(xCell,yCell, nearestNode.xCell, nearestNode.yCell);
             double dx = (xCell - nearestNode.xCell) / pointDistance;
             double dy = (yCell - nearestNode.yCell) / pointDistance;
-            this->xPos = xCell + dx * stepLength;
-            this->yPos = yCell + dy * stepLength;
+            
+            this->xPos = nearestNode.xPos + dx * stepLength;
+            this->yPos = nearestNode.yPos + dy * stepLength;
+            ROS_INFO_STREAM("Calc xPos: " << this->xPos);
+            ROS_INFO_STREAM("Calc yPos: " << this->yPos);
         }
 
         double calcDistance(double x1, double y1, double x2, double y2) {
