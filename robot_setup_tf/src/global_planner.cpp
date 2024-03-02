@@ -46,7 +46,7 @@ class Node{
             double nearestDist = calcDistance(x,Tree[0].x,y,Tree[0].y);
 
             for(int i = 1; i < Tree.size(); i++) {
-                dist = calcDistance(x,Tree[i].x,y,Tree[i].y)
+                double dist = calcDistance(x,Tree[i].x,y,Tree[i].y)
                 if (dist < nearestDist) {
                     nearestNode = Tree[i];
                     nearestDist = dist;
