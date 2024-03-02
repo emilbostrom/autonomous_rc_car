@@ -44,7 +44,7 @@ class Node{
         Node FindNearestNode(std::vector<Node> Tree) {
             Node nearestNode = Tree[0];
             ROS_INFO_STREAM("Start node info: " << nearestNode.id << " x: " << nearestNode.x << " y: " << nearestNode.y);
-            ROS_INFO_STREAM("Should be same as above: " << Tree[0]);
+            ROS_INFO_STREAM("Should be same as above: " << Tree[0].id << " x: " << Tree[0].x << " y: " << Tree[0].y);
 
             double nearestDist = calcDistance(x,y,Tree[0].x,Tree[0].y);
             ROS_INFO_STREAM("Distance between node and start node: " << nearestDist);
