@@ -42,7 +42,7 @@ class GlobalPlanner{
 
         typedef std::mt19937 MyRNG;
         MyRNG rng;
-        uint32_t seed_val;
+        uint32_t seed_val = 45218965;
         rng.seed(seed_val);
 
         std::uniform_int_distribution<uint32_t> widthGenerator;
