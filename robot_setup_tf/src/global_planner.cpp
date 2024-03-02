@@ -54,7 +54,7 @@ class Node{
         }
 
         double calcDistance(double x1, double y1, double x2, double y2) {
-            return std::min(sqrt(pow((x2-x1),2) + pow((y2-y1),2)),0.001);
+            return std::max(sqrt(pow((x2-x1),2) + pow((y2-y1),2)),0.001);
         }
 
         void FindNearestNode(std::vector<Node> Tree) {
