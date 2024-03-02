@@ -41,15 +41,12 @@ class GlobalPlanner{
         double wQuat;
 
         typedef std::mt19937 MyRNG;
-        MyRNG rng;
-        uint32_t seed_val = 45218965;
-        rng.seed(seed_val);
 
         std::uniform_int_distribution<uint32_t> widthGenerator;
         std::uniform_int_distribution<uint32_t> heightGenerator;
 
         GlobalPlanner(const geometry_msgs::PoseStamped::ConstPtr& poseMsg, 
-                      const geometry_msgs::MapMetaDataConstPtr& mapMetaMsg) {
+                      const nav_msgs::MapMetaDataConstPtr& mapMetaMsg) {
             
             ROS_INFO_STREAM("Received pose: " << poseMsg);
             xCurrent = poseMsg->pose.position.x;
@@ -63,8 +60,12 @@ class GlobalPlanner{
             mapResulution = mapMetaMsg.resolution;
             mapWidth = mapMetaMsg.width*mapResulution;
             mapHeight = mapMetaMsg.height*mapResulution;
-            widthGenerator.param(0,mapWidth);
-            heightGenerator.param(0,mapHeight);
+            
+            MyRNG rng;
+            uint32_t seed_val = 100;
+            rng.seed(seed_val);
+            widthGenerator = std::uniform_int_distribution<uint32_t>(0, mapWidth);
+            heightGenerator = std::uniform_int_distribution<uint32_t>(0, mapHeight);
 
             stepLength = mapResulution*2;
             goalDistThreshold = stepLength*2;
