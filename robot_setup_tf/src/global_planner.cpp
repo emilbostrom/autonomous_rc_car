@@ -10,8 +10,8 @@
 #include <cmath>
 
 
-double x_goal = 5;
-double y_goal = 5;
+double xGoal = 5;
+double yGoal = 5;
 double z_goal = 0;
 double x_quat_goal = 0.707;
 double y_quat_goal = 0;
@@ -24,65 +24,56 @@ std::vector<geometry_msgs::PoseStamped::ConstPtr> pose;
 
 class GlobalPlanner{
     public:
-        std::string frame_id_map = "map";
-        
-        double step_length = 0.1;
-
-        double goal_dist_threshold = step_length*2;
-
-        double x_current = 0;
-        double y_current = 0;
-        double z_current = 0;
-        double x_quat = 0;
-        double y_quat = 0;
-        double z_quat = 0;
-        double w_quat = 0;
-
+        std::string frameIdMap = "map";
+        double stepLength = 0.1;
+        double goalDistThreshold = stepLength*2;
 
         void initialPosition(const geometry_msgs::PoseStamped::ConstPtr& msg) {
             ROS_INFO_STREAM("Received pose: " << msg);
-            x_current = msg->pose.position.x;
-            y_current = msg->pose.position.y;
-            z_current = msg->pose.position.z;
-            x_quat = msg->pose.orientation.x;
-            y_quat = msg->pose.orientation.y;
-            z_quat = msg->pose.orientation.z;
-            w_quat = msg->pose.orientation.w;
+            xCurrent = msg->pose.position.x;
+            yCurrent = msg->pose.position.y;
+            zCurrent = msg->pose.position.z;
+            xQuat = msg->pose.orientation.x;
+            yQuat = msg->pose.orientation.y;
+            zQuat = msg->pose.orientation.z;
+            wQuat = msg->pose.orientation.w;
 
-            ROS_INFO_STREAM(x_current);
-            ROS_INFO_STREAM(y_current);
-            ROS_INFO_STREAM(z_current);
-            ROS_INFO_STREAM(x_quat);
-            ROS_INFO_STREAM(y_quat);
-            ROS_INFO_STREAM(z_quat);
-            ROS_INFO_STREAM(w_quat);
+            ROS_INFO_STREAM(xCurrent);
+            ROS_INFO_STREAM(yCurrent);
+            ROS_INFO_STREAM(zCurrent);
+            ROS_INFO_STREAM(xQuat);
+            ROS_INFO_STREAM(yQuat);
+            ROS_INFO_STREAM(zQuat);
+            ROS_INFO_STREAM(wQuat);
         }
 
-        double CalcDistance(double x1, double y1, double x2, double y2) {
+        void 
+
+        double calcDistance(double x1, double y1, double x2, double y2) {
             return sqrt(pow((x2-x1),2) + pow((y2-y1),2))  ;
         }
 
-        const nav_msgs::Path CreatePath(){
+        const nav_msgs::Path createPath(){
             
             nav_msgs::Path path;
-            std::vector<geometry_msgs::PoseStamped> poses_stamped;
+            std::vector<geometry_msgs::PoseStamped> posesStampedVectorMsg;
 
-            geometry_msgs::PoseStamped pose_stamped;
-            pose_stamped.header.frame_id = frame_id_map;
+            geometry_msgs::PoseStamped poseStampedMsg;
+            poseStampedMsg.header.frame_id = frameIdMap;
 
             geometry_msgs::Pose pose;
 
-            double x_path_pos = x_current;
-            double y_path_pos = y_current;
+            double xPathPos = xCurrent;
+            double yPathPos = yCurrent;
 
-            double dist_to_goal = CalcDistance(x_path_pos,y_path_pos,x_goal,y_goal);
+            double distToGoal = calcDistance(xPathPos,yPathPos,xGoal,yGoal);
 
-            while(dist_to_goal > goal_dist_threshold) {
-                x_path_pos += step_length;
-                y_path_pos += step_length;
+            while(distToGoal > goalDistThreshold) {
+                xPathPos += stepLength;
+                yPathPos += stepLength;
                 
-                pose.position.x = x_path_pos;
-                pose.position.y = y_path_pos;
+                pose.position.x = xPathPos;
+                pose.position.y = yPathPos;
                 pose.position.z = 0;
 
                 pose.orientation.x = 0.924;
@@ -90,15 +81,15 @@ class GlobalPlanner{
                 pose.orientation.z = 0;
                 pose.orientation.w = 0.383;
 
-                pose_stamped.pose = pose;
+                poseStampedMsg.pose = pose;
 
-                poses_stamped.push_back(pose_stamped);
+                posesStampedVectorMsg.push_back(poseStampedMsg);
                 
-                dist_to_goal = CalcDistance(x_path_pos,y_path_pos,x_goal,y_goal);
+                distToGoal = calcDistance(xPathPos,yPathPos,xGoal,yGoal);
             }
 
-            path.header.frame_id = frame_id_map;
-            path.poses = poses_stamped;
+            path.header.frame_id = frameIdMap;
+            path.poses = posesStampedVectorMsg;
             return path;
         }
 
@@ -112,19 +103,19 @@ int main(int argc, char** argv) {
     ros::init(argc,argv, "global_planner");
     ros::NodeHandle n;
     
-    boost::shared_ptr<geometry_msgs::PoseStamped const> ini_pos_msg;
-    ini_pos_msg = ros::topic::waitForMessage<geometry_msgs::PoseStamped>("slam_out_pose",ros::Duration(10.0));
+    boost::shared_ptr<geometry_msgs::PoseStamped const> iniPosMsg;
+    iniPosMsg = ros::topic::waitForMessage<geometry_msgs::PoseStamped>("slam_out_pose",ros::Duration(10.0));
 
-    planner.initialPosition(ini_pos_msg);
+    planner.initialPosition(iniPosMsg);
 
     //ros::Subscriber sub = n.subscribe("slam_out_pose",1000, &GlobalPlanner::positionSubscriber, &planner);
     ros::Publisher pub = n.advertise<nav_msgs::Path>("global_path",10);
 
     ros::Rate r(10); // 10 hz
 
-    while(ros::ok()) {
+    nav_msgs::Path path = planner.createPath();
 
-        nav_msgs::Path path = planner.CreatePath();
+    while(ros::ok()) {
 
         pub.publish(path);
 
