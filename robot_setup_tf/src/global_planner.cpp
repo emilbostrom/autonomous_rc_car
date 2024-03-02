@@ -26,7 +26,7 @@ std::vector<geometry_msgs::PoseStamped::ConstPtr> pose;
 class GlobalPlanner{
     public:
         std::string frameIdMap = "map";
-        double mapResulution; // [m/cell]
+        double mapResolution; // [m/cell]
         int mapWidth; // [m]
         int mapHeight; // [m]
         double stepLength; // [m]
@@ -58,16 +58,19 @@ class GlobalPlanner{
             zQuat = poseMsg->pose.orientation.z;
             wQuat = poseMsg->pose.orientation.w;
 
-            mapResulution = mapMetaMsg->resolution;
-            mapWidth = mapMetaMsg->width*mapResulution;
-            mapHeight = mapMetaMsg->height*mapResulution;
+            mapResolution = mapMetaMsg->resolution;
+            mapWidth = mapMetaMsg->width*mapResolution;
+            mapHeight = mapMetaMsg->height*mapResolution;
+
+            ROS_INFO_STREAM("Map width: " << mapWidth);
+            ROS_INFO_STREAM("Map height: " << mapHeight);
             
             uint32_t seed_val = 100;
             rng.seed(seed_val);
             widthGenerator = std::uniform_int_distribution<uint32_t>(0, mapWidth);
             heightGenerator = std::uniform_int_distribution<uint32_t>(0, mapHeight);
 
-            stepLength = mapResulution*2;
+            stepLength = mapResolution*2;
             goalDistThreshold = stepLength*2;
         }
 
