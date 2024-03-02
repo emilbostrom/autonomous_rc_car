@@ -112,7 +112,7 @@ int main(int argc, char** argv) {
     ros::init(argc,argv, "global_planner");
     ros::NodeHandle n;
     
-    boost::shared_ptr<geometry_msgs::PoseStamped const> ini_pos;
+    boost::shared_ptr<geometry_msgs::PoseStamped const> ini_pos_msg;
     ini_pos_msg = ros::topic::waitForMessage<geometry_msgs::PoseStamped>("slam_out_pose",ros::Duration(10.0));
 
     planner.initialPosition(ini_pos_msg)
