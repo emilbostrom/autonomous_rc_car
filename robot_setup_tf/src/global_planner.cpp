@@ -23,6 +23,41 @@ double w_quat_goal = 0.707;
 
 std::vector<geometry_msgs::PoseStamped::ConstPtr> pose;
 
+class Node{
+    public:
+        int x;
+        int y;
+        int id;
+        int idParent;
+        int cost;
+        
+        Node(int x, int y, int id){
+            ROS_INFO_STREAM("Node id: " << id);
+            ROS_INFO_STREAM("Width generated: " << x);
+            ROS_INFO_STREAM("Height generated: " << y);
+        }
+
+        double calcDistance(double x1, double y1, double x2, double y2) {
+            return sqrt(pow((x2-x1),2) + pow((y2-y1),2));
+        }
+
+        Node FindNearestNode(std::vector<Node> Tree) {
+            Node nearestNode = Tree[0];
+            double nearestDist = calcDistance(x,Tree[0].x,y,Tree[0])
+
+            for (int i = 1; i < Tree.size(), i++) {
+                dist = calcDistance(x,Tree[i].x,y,Tree[i])
+                if (dist < nearestDist) {
+                    nearestNode = Tree[i];
+                    nearestDist = dist;
+                }
+            }
+            return nearestNode;
+        }
+
+};
+
+
 class GlobalPlanner{
     public:
         std::string frameIdMap = "map";
@@ -94,9 +129,24 @@ class GlobalPlanner{
 
             double distToGoal = calcDistance(xPathPos,yPathPos,xGoal,yGoal);
 
-            while(distToGoal > goalDistThreshold) {
-                ROS_INFO_STREAM("Width generated: " << widthGenerator(rng));
-                ROS_INFO_STREAM("Height generated: " << heightGenerator(rng));
+
+            // Create first node, which is current position
+            Node nodeOrigin(xCurrent,yCurrent,0);
+            nodeOrigin::idParent = 0;
+            node::cost = 0;
+
+            // Initialize nearest node object
+            Node nearestNode;
+
+            // Create an array of all nodes
+            std::vector<Node> Tree;
+            Tree.push_back(nodeOrigin)
+
+            int maxIterationsRrt = 1000;
+            for(int iRrt  = 1; iRrt < maxIterationsRrt; iRrt++) {
+                
+                Node node(widthGenerator(rng),heightGenerator(rng),iRrt);
+                nearestNode = node.FindNearestNode(Tree);
                 
                 xPathPos += stepLength;
                 yPathPos += stepLength;
@@ -115,6 +165,9 @@ class GlobalPlanner{
                 posesStampedVectorMsg.push_back(poseStampedMsg);
                 
                 distToGoal = calcDistance(xPathPos,yPathPos,xGoal,yGoal);
+                if (distToGoal > goalDistThreshold) {
+                    break;
+                }
             }
 
             path.header.frame_id = frameIdMap;
