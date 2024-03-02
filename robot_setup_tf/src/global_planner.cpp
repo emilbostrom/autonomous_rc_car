@@ -28,15 +28,23 @@ class GlobalPlanner{
         double stepLength = 0.1;
         double goalDistThreshold = stepLength*2;
 
+        double xCurrent;
+        double yCurrent;
+        double zCurrent;
+        double xQuat;
+        double yQuat;
+        double zQuat;
+        double wQuat;
+
         void initialPosition(const geometry_msgs::PoseStamped::ConstPtr& msg) {
             ROS_INFO_STREAM("Received pose: " << msg);
-            double xCurrent = msg->pose.position.x;
-            double yCurrent = msg->pose.position.y;
-            double zCurrent = msg->pose.position.z;
-            double xQuat = msg->pose.orientation.x;
-            double yQuat = msg->pose.orientation.y;
-            double zQuat = msg->pose.orientation.z;
-            double wQuat = msg->pose.orientation.w;
+            xCurrent = msg->pose.position.x;
+            yCurrent = msg->pose.position.y;
+            zCurrent = msg->pose.position.z;
+            xQuat = msg->pose.orientation.x;
+            yQuat = msg->pose.orientation.y;
+            zQuat = msg->pose.orientation.z;
+            wQuat = msg->pose.orientation.w;
 
             ROS_INFO_STREAM(xCurrent);
             ROS_INFO_STREAM(yCurrent);
