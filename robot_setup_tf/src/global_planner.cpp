@@ -46,7 +46,7 @@ class Node{
             double nearestDist = calcDistance(x,Tree[0].x,y,Tree[0].y);
             ROS_INFO_STREAM("Distance between node and start node: " << nearestDist);
 
-            ROS_INFO_STREAM("Tree size: " << Tree.size())
+            ROS_INFO_STREAM("Tree size: " << Tree.size());
 
             for(int i = 1; i < Tree.size(); i++) {
                 double dist = calcDistance(x,Tree[i].x,y,Tree[i].y);
