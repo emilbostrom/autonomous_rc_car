@@ -115,7 +115,7 @@ int main(int argc, char** argv) {
     boost::shared_ptr<geometry_msgs::PoseStamped const> ini_pos_msg;
     ini_pos_msg = ros::topic::waitForMessage<geometry_msgs::PoseStamped>("slam_out_pose",ros::Duration(10.0));
 
-    planner.initialPosition(ini_pos_msg)
+    planner.initialPosition(ini_pos_msg);
 
     //ros::Subscriber sub = n.subscribe("slam_out_pose",1000, &GlobalPlanner::positionSubscriber, &planner);
     ros::Publisher pub = n.advertise<nav_msgs::Path>("global_path",10);
