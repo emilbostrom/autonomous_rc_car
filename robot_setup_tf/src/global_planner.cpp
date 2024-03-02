@@ -25,26 +25,26 @@ std::vector<geometry_msgs::PoseStamped::ConstPtr> pose;
 
 class Node{
     public:
-        int x;
-        int y;
+        int xCell;
+        int yCell;
         int id;
         int idParent;
         int cost;
         int stepLength;
+
+        double xPos;
+        double yPos;
         
-        Node(int x, int y, int id, int stepLength) : x(x), y(y), id(id) stepLength(stepLength){
+        Node(int xCell, int yCell, int id, int stepLength) : xCell(xCell), yCell(yCell), id(id), stepLength(stepLength){
             ROS_INFO_STREAM("Node id: " << this->id);
-            ROS_INFO_STREAM("Width generated: " << this->x);
-            ROS_INFO_STREAM("Height generated: " << this->y);
+            ROS_INFO_STREAM("Width generated: " << this->xCell);
+            ROS_INFO_STREAM("Height generated: " << this->yCell);
         }
 
-        calcNewNodePos(Node nearestNode) {
-            xDelta = nearestNode.x - x;
-            yDelta = nearestNode.y - y;
-
-            pointDistance = calcDistance(x,y, nearestNode.x, nearestNode.y);
-            x = x / sqrt(pointDistance) * stepLength;
-            y = y / sqrt(pointDistance) * stepLength;
+        void calcNewNodePos(Node nearestNode) {
+            double pointDistance = calcDistance(xCell,yCell, nearestNode.xCell, nearestNode.yCell);
+            xPos = xCell / sqrt(pointDistance) * stepLength;
+            yPos = yCell / sqrt(pointDistance) * stepLength;
         }
 
         double calcDistance(double x1, double y1, double x2, double y2) {
@@ -53,16 +53,16 @@ class Node{
 
         Node FindNearestNode(std::vector<Node> Tree) {
             Node nearestNode = Tree[0];
-            ROS_INFO_STREAM("Start node info: " << nearestNode.id << " x: " << nearestNode.x << " y: " << nearestNode.y);
-            ROS_INFO_STREAM("Should be same as above: " << Tree[0].id << " x: " << Tree[0].x << " y: " << Tree[0].y);
+            ROS_INFO_STREAM("Start node info: " << nearestNode.id << " x: " << nearestNode.xCell << " y: " << nearestNode.yCell);
+            ROS_INFO_STREAM("Should be same as above: " << Tree[0].id << " xCell: " << Tree[0].xCell << " y: " << Tree[0].yCell);
 
-            double nearestDist = calcDistance(x,y,Tree[0].x,Tree[0].y);
+            double nearestDist = calcDistance(xCell,yCell,Tree[0].xCell,Tree[0].yCell);
             ROS_INFO_STREAM("Distance between node and start node: " << nearestDist);
 
             ROS_INFO_STREAM("Tree size: " << Tree.size());
 
             for(int i = 1; i < Tree.size(); i++) {
-                double dist = calcDistance(x,y,Tree[i].x,Tree[i].y);
+                double dist = calcDistance(xCell,yCell,Tree[i].xCell,Tree[i].yCell);
                 if (dist < nearestDist) {
                     nearestNode = Tree[i];
                     nearestDist = dist;
@@ -161,17 +161,14 @@ class GlobalPlanner{
             int maxIterationsRrt = 1000;
             for(int iRrt  = 1; iRrt < maxIterationsRrt; iRrt++) {
                 Node newNode(widthGenerator(rng),heightGenerator(rng),iRrt,stepLength);
-                ROS_INFO_STREAM("New node generated: " << newNode.id << " x: " << newNode.x << " y: " << newNode.y);
+                ROS_INFO_STREAM("New node generated: " << newNode.id << " x: " << newNode.xCell << " y: " << newNode.y);
                 
                 newNode.FindNearestNode(Tree);
                 Tree.push_back(newNode);
-                ROS_INFO_STREAM("New node added to tree: " << newNode.id << " x: " << newNode.x << " y: " << newNode.y);
+                ROS_INFO_STREAM("New node added to tree: " << newNode.id << " x: " << newNode.xCell << " y: " << newNode.y);
                 
-                xPathPos += stepLength;
-                yPathPos += stepLength;
-                
-                pose.position.x = xPathPos;
-                pose.position.y = yPathPos;
+                pose.position.x = newNode.xPos;
+                pose.position.y = newNode.yPos;
                 pose.position.z = 0;
 
                 pose.orientation.x = 0.924;
