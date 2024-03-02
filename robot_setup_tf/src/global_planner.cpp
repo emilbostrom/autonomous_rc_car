@@ -58,7 +58,10 @@ class Node{
                     nearestDist = dist;
                 }
             }
-            ROS_INFO_STREAM("Closest to node " << id << " is node: " << nearestNode.id << " with dist: " << nearestDist);
+
+            this->idParent = nearestNode.id;
+
+            ROS_INFO_STREAM("Closest to node " << id << " is node: " << this->idParent << " with dist: " << nearestDist);
             return nearestNode;
         }
 
@@ -152,8 +155,8 @@ class GlobalPlanner{
                 ROS_INFO_STREAM("New node generated: " << newNode.id << " x: " << newNode.x << " y: " << newNode.y);
                 
                 Node nearestNode = newNode.FindNearestNode(Tree);
-                Tree.push_back(nearestNode);
-                ROS_INFO_STREAM("New node added to tree: " << nearestNode.id << " x: " << nearestNode.x << " y: " << nearestNode.y);
+                Tree.push_back(newNode);
+                ROS_INFO_STREAM("New node added to tree: " << newNode.id << " x: " << newNode.x << " y: " << newNode.y);
                 
                 xPathPos += stepLength;
                 yPathPos += stepLength;
