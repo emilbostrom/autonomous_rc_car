@@ -45,8 +45,8 @@ class Node{
             Node nearestNode = Tree[0];
             double nearestDist = calcDistance(x,Tree[0].x,y,Tree[0])
 
-            for (int i = 1; i < Tree.size(), i++) {
-                dist = calcDistance(x,Tree[i].x,y,Tree[i])
+            for (int i = 1; i < Tree.size(); i++) {
+                dist = calcDistance(x,Tree[i].x,y,Tree[i].y)
                 if (dist < nearestDist) {
                     nearestNode = Tree[i];
                     nearestDist = dist;
@@ -132,21 +132,17 @@ class GlobalPlanner{
 
             // Create first node, which is current position
             Node nodeOrigin(xCurrent,yCurrent,0);
-            nodeOrigin::idParent = 0;
-            node::cost = 0;
-
-            // Initialize nearest node object
-            Node nearestNode;
+            nodeOrigin.idParent = 0;
+            nodeOrigin.cost = 0;
 
             // Create an array of all nodes
             std::vector<Node> Tree;
-            Tree.push_back(nodeOrigin)
+            Tree.push_back(nodeOrigin);
 
             int maxIterationsRrt = 1000;
             for(int iRrt  = 1; iRrt < maxIterationsRrt; iRrt++) {
-                
                 Node node(widthGenerator(rng),heightGenerator(rng),iRrt);
-                nearestNode = node.FindNearestNode(Tree);
+                Node nearestNode = node.FindNearestNode(Tree);
                 
                 xPathPos += stepLength;
                 yPathPos += stepLength;
