@@ -41,6 +41,7 @@ class GlobalPlanner{
         double wQuat;
 
         typedef std::mt19937 MyRNG;
+        MyRNG rng;
 
         std::uniform_int_distribution<uint32_t> widthGenerator;
         std::uniform_int_distribution<uint32_t> heightGenerator;
@@ -57,11 +58,10 @@ class GlobalPlanner{
             zQuat = poseMsg->pose.orientation.z;
             wQuat = poseMsg->pose.orientation.w;
 
-            mapResulution = mapMetaMsg.resolution;
-            mapWidth = mapMetaMsg.width*mapResulution;
-            mapHeight = mapMetaMsg.height*mapResulution;
+            mapResulution = mapMetaMsg->resolution;
+            mapWidth = mapMetaMsg->width*mapResulution;
+            mapHeight = mapMetaMsg->height*mapResulution;
             
-            MyRNG rng;
             uint32_t seed_val = 100;
             rng.seed(seed_val);
             widthGenerator = std::uniform_int_distribution<uint32_t>(0, mapWidth);
@@ -130,12 +130,12 @@ int main(int argc, char** argv) {
     iniPosMsg = ros::topic::waitForMessage<geometry_msgs::PoseStamped>("slam_out_pose",ros::Duration(2.0));
 
     boost::shared_ptr<nav_msgs::MapMetaData const> mapMetaData;
-    mapMetaData = ros::topic::waitForMessage<geometry_msgs::MapMetaData>("map_metadata",ros::Duration(2.0));
+    mapMetaData = ros::topic::waitForMessage<nav_msgs::MapMetaData>("map_metadata",ros::Duration(2.0));
 
     GlobalPlanner planner(iniPosMsg,mapMetaData);
 
     boost::shared_ptr<nav_msgs::OccupancyGrid const> mapData;
-    mapData = ros::topic::waitForMessage<geometry_msgs::OccupancyGrid>("map",ros::Duration(2.0));
+    mapData = ros::topic::waitForMessage<nav_msgs::OccupancyGrid>("map",ros::Duration(2.0));
 
 
     ros::Publisher pub = n.advertise<nav_msgs::Path>("global_path",10);
