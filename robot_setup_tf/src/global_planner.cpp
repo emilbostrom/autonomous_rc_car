@@ -50,12 +50,12 @@ class Node{
 
             for(int i = 1; i < Tree.size(); i++) {
                 double dist = calcDistance(x,y,Tree[i].x,Tree[i].y);
-                ROS_INFO_STREAM("Distance between node " << id << " and node " << i << "is: " << dist);
                 if (dist < nearestDist) {
                     nearestNode = Tree[i];
                     nearestDist = dist;
                 }
             }
+            ROS_INFO_STREAM("Closest to node " << id << " is node: " << nearestNode.id << " with dist: " << nearestDist)
             return nearestNode;
         }
 
