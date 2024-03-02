@@ -46,7 +46,7 @@ class GlobalPlanner{
         std::uniform_int_distribution<uint32_t> heightGenerator;
 
         GlobalPlanner(const geometry_msgs::PoseStamped::ConstPtr& poseMsg, 
-                      const nav_msgs::MapMetaDataConstPtr& mapMetaMsg) {
+                      const nav_msgs::MapMetaData::ConstPtr& mapMetaMsg) {
             
             ROS_INFO_STREAM("Received pose: " << poseMsg);
             xCurrent = poseMsg->pose.position.x;
