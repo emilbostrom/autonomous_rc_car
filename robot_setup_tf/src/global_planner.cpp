@@ -45,8 +45,8 @@ class Node{
             double pointDistance = calcDistance(xCell,yCell, nearestNode.xCell, nearestNode.yCell);
             double dx = (xCell - nearestNode.xCell) / pointDistance;
             double dy = (yCell - nearestNode.yCell) / pointDistance;
-            xPos = xCell + dx * stepLength;
-            yPos = yCell + dy * stepLength;
+            this->xPos = xCell + dx * stepLength;
+            this->yPos = yCell + dy * stepLength;
         }
 
         double calcDistance(double x1, double y1, double x2, double y2) {
