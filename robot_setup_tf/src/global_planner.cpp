@@ -30,11 +30,21 @@ class Node{
         int id;
         int idParent;
         int cost;
+        int stepLength;
         
-        Node(int x, int y, int id) : x(x), y(y), id(id){
+        Node(int x, int y, int id, int stepLength) : x(x), y(y), id(id) stepLength(stepLength){
             ROS_INFO_STREAM("Node id: " << this->id);
             ROS_INFO_STREAM("Width generated: " << this->x);
             ROS_INFO_STREAM("Height generated: " << this->y);
+        }
+
+        calcNewNodePos(Node nearestNode) {
+            xDelta = nearestNode.x - x;
+            yDelta = nearestNode.y - y;
+
+            pointDistance = calcDistance(x,y, nearestNode.x, nearestNode.y);
+            x = x / sqrt(pointDistance) * stepLength;
+            y = y / sqrt(pointDistance) * stepLength;
         }
 
         double calcDistance(double x1, double y1, double x2, double y2) {
@@ -61,8 +71,7 @@ class Node{
 
             this->idParent = nearestNode.id;
 
-            ROS_INFO_STREAM("Closest to node " << id << " is node: " << this->idParent << " with dist: " << nearestDist);
-            return nearestNode;
+            calcNewNodePos(nearestNode);
         }
 
 };
@@ -141,7 +150,7 @@ class GlobalPlanner{
 
 
             // Create first node, which is current position
-            Node nodeOrigin(xCurrent,yCurrent,0);
+            Node nodeOrigin(xCurrent,yCurrent,0,stepLength);
             nodeOrigin.idParent = 0;
             nodeOrigin.cost = 0;
 
@@ -151,10 +160,10 @@ class GlobalPlanner{
 
             int maxIterationsRrt = 1000;
             for(int iRrt  = 1; iRrt < maxIterationsRrt; iRrt++) {
-                Node newNode(widthGenerator(rng),heightGenerator(rng),iRrt);
+                Node newNode(widthGenerator(rng),heightGenerator(rng),iRrt,stepLength);
                 ROS_INFO_STREAM("New node generated: " << newNode.id << " x: " << newNode.x << " y: " << newNode.y);
                 
-                Node nearestNode = newNode.FindNearestNode(Tree);
+                newNode.FindNearestNode(Tree);
                 Tree.push_back(newNode);
                 ROS_INFO_STREAM("New node added to tree: " << newNode.id << " x: " << newNode.x << " y: " << newNode.y);
                 
