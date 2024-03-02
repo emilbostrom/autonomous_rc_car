@@ -55,7 +55,7 @@ class Node{
                     nearestDist = dist;
                 }
             }
-            ROS_INFO_STREAM("Closest to node " << id << " is node: " << nearestNode.id << " with dist: " << nearestDist)
+            ROS_INFO_STREAM("Closest to node " << id << " is node: " << nearestNode.id << " with dist: " << nearestDist);
             return nearestNode;
         }
 
