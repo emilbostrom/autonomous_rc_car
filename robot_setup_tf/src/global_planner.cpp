@@ -43,6 +43,9 @@ class Node{
 
         Node FindNearestNode(std::vector<Node> Tree) {
             Node nearestNode = Tree[0];
+            ROS_INFO_STREAM("Start node info: " << nearestNode);
+            ROS_INFO_STREAM("Should be same as above: " << Tree[0]);
+
             double nearestDist = calcDistance(x,y,Tree[0].x,Tree[0].y);
             ROS_INFO_STREAM("Distance between node and start node: " << nearestDist);
 
@@ -146,9 +149,11 @@ class GlobalPlanner{
             int maxIterationsRrt = 1000;
             for(int iRrt  = 1; iRrt < maxIterationsRrt; iRrt++) {
                 Node node(widthGenerator(rng),heightGenerator(rng),iRrt);
+                ROS_INFO_STREAM("New node generated: " << node);
+                
                 Node nearestNode = node.FindNearestNode(Tree);
-
                 Tree.push_back(nearestNode);
+                ROS_INFO_STREAM("New node added to tree: " << nearestNode);
                 
                 xPathPos += stepLength;
                 yPathPos += stepLength;
