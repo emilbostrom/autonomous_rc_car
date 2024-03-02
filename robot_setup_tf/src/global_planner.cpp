@@ -43,8 +43,8 @@ class Node{
 
         void calcNewNodePos(Node nearestNode) {
             double pointDistance = calcDistance(xCell,yCell, nearestNode.xCell, nearestNode.yCell);
-            double dx = (xCell - nearestNode.xCell) / pointDistance;
-            double dy = (yCell - nearestNode.yCell) / pointDistance;
+            double dx = static_cast<double>(xCell - nearestNode.xCell) / pointDistance;
+            double dy = static_cast<double>(yCell - nearestNode.yCell) / pointDistance;
             
             this->xPos = nearestNode.xPos + dx * stepLength;
             this->yPos = nearestNode.yPos + dy * stepLength;
