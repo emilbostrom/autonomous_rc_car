@@ -43,7 +43,7 @@ class Node{
 
         Node FindNearestNode(std::vector<Node> Tree) {
             Node nearestNode = Tree[0];
-            double nearestDist = calcDistance(x,Tree[0].x,y,Tree[0].y)
+            double nearestDist = calcDistance(x,Tree[0].x,y,Tree[0].y);
 
             for(int i = 1; i < Tree.size(); i++) {
                 dist = calcDistance(x,Tree[i].x,y,Tree[i].y)
