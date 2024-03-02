@@ -1,6 +1,8 @@
 #include <ros/ros.h>
 #include <geometry_msgs/PoseStamped.h>
 #include <nav_msgs/Path.h>
+#include <nav_msgs/MapMetaData.h>
+#include <nav_msgs/OccupancyGrid.h>
 #include <sstream>
 #include <vector>
 #include <string>
@@ -37,7 +39,7 @@ class GlobalPlanner{
         double w_quat = 0;
 
 
-        void positionSubscriber(const geometry_msgs::PoseStamped::ConstPtr& msg) {
+        void initialPosition(const geometry_msgs::PoseStamped::ConstPtr& msg) {
             ROS_INFO_STREAM("Received pose: " << msg);
             x_current = msg->pose.position.x;
             y_current = msg->pose.position.y;
@@ -109,24 +111,16 @@ int main(int argc, char** argv) {
 
     ros::init(argc,argv, "global_planner");
     ros::NodeHandle n;
+    
+    boost::shared_ptr<geometry_msgs::PoseStamped const> ini_pos;
+    ini_pos_msg = ros::topic::waitForMessage<geometry_msgs::PoseStamped>("slam_out_pose",ros::Duration(10.0));
 
-    ros::Subscriber sub = n.subscribe("slam_out_pose",1000, &GlobalPlanner::positionSubscriber, &planner);
+    planner.initialPosition(ini_pos_msg)
+
+    //ros::Subscriber sub = n.subscribe("slam_out_pose",1000, &GlobalPlanner::positionSubscriber, &planner);
     ros::Publisher pub = n.advertise<nav_msgs::Path>("global_path",10);
 
     ros::Rate r(10); // 10 hz
-    
-
-    geometry_msgs::PoseStamped goal_pos_msg;
-
-    goal_pos_msg.pose.position.x = x_goal;
-    goal_pos_msg.pose.position.y = y_goal;
-    goal_pos_msg.pose.position.z = z_goal;
-    goal_pos_msg.pose.orientation.x = x_quat_goal;
-    goal_pos_msg.pose.orientation.y = y_quat_goal;
-    goal_pos_msg.pose.orientation.z = z_quat_goal;
-    goal_pos_msg.pose.orientation.w = w_quat_goal;
-    
-    goal_pos_msg.header.frame_id = planner.frame_id_map;
 
     while(ros::ok()) {
 
