@@ -51,7 +51,7 @@ class Node{
             return sqrt(pow((x2-x1),2) + pow((y2-y1),2));
         }
 
-        Node FindNearestNode(std::vector<Node> Tree) {
+        void FindNearestNode(std::vector<Node> Tree) {
             Node nearestNode = Tree[0];
             ROS_INFO_STREAM("Start node info: " << nearestNode.id << " x: " << nearestNode.xCell << " y: " << nearestNode.yCell);
             ROS_INFO_STREAM("Should be same as above: " << Tree[0].id << " xCell: " << Tree[0].xCell << " y: " << Tree[0].yCell);
@@ -161,11 +161,10 @@ class GlobalPlanner{
             int maxIterationsRrt = 1000;
             for(int iRrt  = 1; iRrt < maxIterationsRrt; iRrt++) {
                 Node newNode(widthGenerator(rng),heightGenerator(rng),iRrt,stepLength);
-                ROS_INFO_STREAM("New node generated: " << newNode.id << " x: " << newNode.xCell << " y: " << newNode.y);
+                ROS_INFO_STREAM("New node generated: " << newNode.id << " x: " << newNode.xCell << " y: " << newNode.yCell);
                 
                 newNode.FindNearestNode(Tree);
                 Tree.push_back(newNode);
-                ROS_INFO_STREAM("New node added to tree: " << newNode.id << " x: " << newNode.xCell << " y: " << newNode.y);
                 
                 pose.position.x = newNode.xPos;
                 pose.position.y = newNode.yPos;
