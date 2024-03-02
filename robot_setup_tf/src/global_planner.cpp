@@ -48,9 +48,12 @@ class Node{
             double dy = static_cast<double>(yCell - nearestNode.yCell) / pointDistance;
             this->xPos = nearestNode.xPos + dx * stepLength;
             this->yPos = nearestNode.yPos + dy * stepLength;
-            ROS_INFO_STREAM("stepLength: " << this->stepLength);
-            ROS_INFO_STREAM("Calc xPos: " << this->xPos);
-            ROS_INFO_STREAM("Calc yPos: " << this->yPos);
+            ROS_INFO_STREAM("nearestNode.xPos: " << nearestNode.xPos);
+            ROS_INFO_STREAM("dx * stepLength: " << dx * stepLength);
+            ROS_INFO_STREAM("new xPos: " << this->xPos);
+            ROS_INFO_STREAM("nearestNode.yPos: " << nearestNode.yPos);
+            ROS_INFO_STREAM("dy * stepLength: " << dy * stepLength);
+            ROS_INFO_STREAM("new yPos: " << this->yPos);
         }
 
         double calcDistance(double x1, double y1, double x2, double y2) {
