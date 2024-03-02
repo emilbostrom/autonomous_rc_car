@@ -30,12 +30,12 @@ class Node{
         int id;
         int idParent;
         int cost;
-        int stepLength;
+        double stepLength;
 
         double xPos = 0;
         double yPos = 0;
         
-        Node(int xCell, int yCell, int id, int stepLength) : xCell(xCell), yCell(yCell), id(id), stepLength(stepLength){
+        Node(int xCell, int yCell, int id, double stepLength) : xCell(xCell), yCell(yCell), id(id), stepLength(stepLength){
             ROS_INFO_STREAM("Node id: " << this->id);
             ROS_INFO_STREAM("Width generated: " << this->xCell);
             ROS_INFO_STREAM("Height generated: " << this->yCell);
@@ -43,13 +43,11 @@ class Node{
 
         void calcNewNodePos(Node nearestNode) {
             double pointDistance = calcDistance(xCell,yCell, nearestNode.xCell, nearestNode.yCell);
-            ROS_INFO_STREAM("pointDistance: " << pointDistance);
             double dx = static_cast<double>(xCell - nearestNode.xCell) / pointDistance;
             double dy = static_cast<double>(yCell - nearestNode.yCell) / pointDistance;
-            ROS_INFO_STREAM("dx: " << dx);
-            ROS_INFO_STREAM("dy: " << dy);
             this->xPos = nearestNode.xPos + dx * stepLength;
             this->yPos = nearestNode.yPos + dy * stepLength;
+            ROS_INFO_STREAM("stepLength: " << this->stepLength);
             ROS_INFO_STREAM("Calc xPos: " << this->xPos);
             ROS_INFO_STREAM("Calc yPos: " << this->yPos);
         }
