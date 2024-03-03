@@ -124,7 +124,7 @@ class GlobalPlanner{
             mapResolution = mapMsg->info.resolution;
             mapWidth = mapMsg->info.width;
             mapHeight = mapMsg->info.height;
-            std::vector<mapData> = mapMsg->data;
+            std::vector<int> mapData = mapMsg->data;
             mapOriginPose = mapMsg->info.origin;
 
             ROS_INFO_STREAM("Map resolution [m]: " << mapResolution);
