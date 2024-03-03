@@ -135,7 +135,7 @@ class GlobalPlanner{
             goalDistThreshold = stepLength*2;
         }
 
-        std::tuple<double, double> CellToCoordinate(cellWidth, cellHeight) {
+        std::tuple<double, double> CellToCoordinate(int cellWidth, int cellHeight) {
             double xPos = (cellWidth - mapWidth/2)*mapResolution;
             double yPos = (cellHeight - mapHeight/2)*mapResolution;
             return {xPos, yPos};
