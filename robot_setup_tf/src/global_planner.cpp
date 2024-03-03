@@ -13,8 +13,8 @@
 #include <stdlib.h>
 
 
-double xGoal = 5;
-double yGoal = 5;
+double xGoal = 2;
+double yGoal = 2;
 double z_goal = 0;
 double x_quat_goal = 0.707;
 double y_quat_goal = 0;
