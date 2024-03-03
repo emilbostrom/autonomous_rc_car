@@ -90,8 +90,8 @@ class GlobalPlanner{
     public:
         std::string frameIdMap = "map";
         double mapResolution; // [m/cell]
-        int mapWidth; // [m]
-        int mapHeight; // [m]
+        int mapWidth; // [cells]
+        int mapHeight; // [cells]
         double stepLength; // [m]
         double goalDistThreshold; // [m]
 
@@ -110,7 +110,7 @@ class GlobalPlanner{
         std::uniform_int_distribution<uint32_t> heightGenerator;
 
         GlobalPlanner(const geometry_msgs::PoseStamped::ConstPtr& poseMsg, 
-                      const nav_msgs::MapMetaData::ConstPtr& mapMetaMsg) {
+                      const nav_msgs::OccupancyGrid::ConstPtr& mapMsg) {
             
             ROS_INFO_STREAM("Received pose: " << poseMsg);
             xCurrent = poseMsg->pose.position.x;
@@ -121,13 +121,13 @@ class GlobalPlanner{
             zQuat = poseMsg->pose.orientation.z;
             wQuat = poseMsg->pose.orientation.w;
 
-            mapResolution = mapMetaMsg->resolution;
-            mapWidth = mapMetaMsg->width*mapResolution;
-            mapHeight = mapMetaMsg->height*mapResolution;
+            mapResolution = mapMsg->info.resolution;
+            mapWidth = mapMsg->info.width;
+            mapHeight = mapMsg->info.height;
 
-            ROS_INFO_STREAM("Map resolution: " << mapResolution);
-            ROS_INFO_STREAM("Map width: " << mapWidth);
-            ROS_INFO_STREAM("Map height: " << mapHeight);
+            ROS_INFO_STREAM("Map resolution [m]: " << mapResolution);
+            ROS_INFO_STREAM("Map width [cells]: " << mapWidth);
+            ROS_INFO_STREAM("Map height [cells]: " << mapHeight);
             
             uint32_t seed_val = 100;
             rng.seed(seed_val);
@@ -159,7 +159,7 @@ class GlobalPlanner{
 
 
             // Create first node, which is current position
-            Node nodeOrigin(xCurrent,yCurrent,0,stepLength);
+            Node nodeOrigin(mapWidth/2,mapHeight/2,0,stepLength);
             nodeOrigin.idParent = 0;
             nodeOrigin.cost = 0;
 
@@ -213,14 +213,10 @@ int main(int argc, char** argv) {
     boost::shared_ptr<geometry_msgs::PoseStamped const> iniPosMsg;
     iniPosMsg = ros::topic::waitForMessage<geometry_msgs::PoseStamped>("slam_out_pose",ros::Duration(2.0));
 
-    boost::shared_ptr<nav_msgs::MapMetaData const> mapMetaData;
-    mapMetaData = ros::topic::waitForMessage<nav_msgs::MapMetaData>("map_metadata",ros::Duration(2.0));
-
-    GlobalPlanner planner(iniPosMsg,mapMetaData);
-
     boost::shared_ptr<nav_msgs::OccupancyGrid const> mapData;
     mapData = ros::topic::waitForMessage<nav_msgs::OccupancyGrid>("map",ros::Duration(2.0));
 
+    GlobalPlanner planner(iniPosMsg,mapData);
 
     ros::Publisher pub = n.advertise<nav_msgs::Path>("global_path",10);
 
