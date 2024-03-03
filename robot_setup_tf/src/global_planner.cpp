@@ -129,9 +129,9 @@ class GlobalPlanner{
                 mapData.push_back(static_cast<int>(value));
             }
 
-            for(int i = 0; i < mapMsg.size();i++){
+            for(int i = 0; i < mapData.size();i++){
                 ROS_INFO_STREAM("index: "<< i);
-                ROS_INFO_STREAM("value: "<<mapMsg[i]);
+                ROS_INFO_STREAM("value: "< <mapData[i]);
             }
 
             ROS_INFO_STREAM("Map resolution [m]: " << mapResolution);
