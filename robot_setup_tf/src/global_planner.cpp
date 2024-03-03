@@ -45,11 +45,7 @@ class Node{
             double dy = static_cast<double>(yPos - nearestNode.yPos) / distance;
             this->xPos = nearestNode.xPos + dx * stepLength;
             this->yPos = nearestNode.yPos + dy * stepLength;
-            ROS_INFO_STREAM("nearestNode.xPos: " << nearestNode.xPos);
-            ROS_INFO_STREAM("dx * stepLength: " << dx * stepLength);
             ROS_INFO_STREAM("new xPos: " << this->xPos);
-            ROS_INFO_STREAM("nearestNode.yPos: " << nearestNode.yPos);
-            ROS_INFO_STREAM("dy * stepLength: " << dy * stepLength);
             ROS_INFO_STREAM("new yPos: " << this->yPos);
         }
 
@@ -71,6 +67,8 @@ class Node{
                 if (dist < nearestDist) {
                     nearestNode = Tree[i];
                     nearestDist = dist;
+                    ROS_INFO_STREAM("New nearest node id: " << nearestNode.id);
+                    ROS_INFO_STREAM("The distance to above is: " << nearestDist);
                 }
             }
 
