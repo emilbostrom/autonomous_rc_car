@@ -256,7 +256,7 @@ class GlobalPlanner{
 
                 bool nodeInObstacle = checkForObstacle(newNode);
                 if (nodeInObstacle) {
-                    ROS_STREAM_INFO("Node in obstacle, skipped");
+                    ROS_INFO_STREAM("Node in obstacle, skipped");
                     continue;
                 }
  
