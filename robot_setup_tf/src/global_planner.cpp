@@ -89,7 +89,7 @@ class GlobalPlanner{
         double mapResolution; // [m/cell]
         int mapWidth; // [cells]
         int mapHeight; // [cells]
-        //int mapData[]; // [0-100] occupancy
+        std::vector<int8_t> mapData; // [0-100] occupancy
         geometry_msgs::Pose mapOriginPose; 
         double stepLength; // [m]
         double goalDistThreshold; // [m]
@@ -124,7 +124,7 @@ class GlobalPlanner{
             mapResolution = mapMsg->info.resolution;
             mapWidth = mapMsg->info.width;
             mapHeight = mapMsg->info.height;
-            std::vector<int8_t> mapData = mapMsg->data;
+            mapData = mapMsg->data;
             mapOriginPose = mapMsg->info.origin;
 
             ROS_INFO_STREAM("Map resolution [m]: " << mapResolution);
