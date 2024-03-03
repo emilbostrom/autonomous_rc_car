@@ -220,7 +220,7 @@ class GlobalPlanner{
                                  << newNode.xPos << " yPos: " << newNode.yPos);
                 
                 distToGoal = calcDistance(newNode.xPos,newNode.yPos,xGoal,yGoal);
-                if (distToGoal > goalDistThreshold) {
+                if (distToGoal < goalDistThreshold) {
                     path = createPathToGoal(Tree);
                     return path;
                     break;
