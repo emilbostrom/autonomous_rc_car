@@ -89,6 +89,8 @@ class GlobalPlanner{
         double mapResolution; // [m/cell]
         int mapWidth; // [cells]
         int mapHeight; // [cells]
+        int[] mapData; // [0-100] occupancy
+        geometry_msgs::Pose mapOriginPose; 
         double stepLength; // [m]
         double goalDistThreshold; // [m]
         double obstacleDistThreshold; // [m]
@@ -122,6 +124,8 @@ class GlobalPlanner{
             mapResolution = mapMsg->info.resolution;
             mapWidth = mapMsg->info.width;
             mapHeight = mapMsg->info.height;
+            mapData = mapMsg->data;
+            mapOriginPose = mapMsg->info.origin;
 
             ROS_INFO_STREAM("Map resolution [m]: " << mapResolution);
             ROS_INFO_STREAM("Map width [cells]: " << mapWidth);
@@ -148,15 +152,15 @@ class GlobalPlanner{
         }
 
         bool checkForObstacle(Node node) {
-            for (int i = 0; i < mapMsg.data.size(); i++) {
-                if (mapMsg.data[i] == 0){
-                    continue
+            for (int i = 0; i < mapData.size(); i++) {
+                if (mapData[i] == 0){
+                    continue;
                 } 
                 
                 int xMapCell;
                 int yMapCell  = i / mapHeight;
-                if (int i % mapWidth == 0) {
-                    xMapCell = i
+                if (i % mapWidth == 0) {
+                    xMapCell = i;
                 } 
                 else {
                     xMapCell = i % mapWidth;
@@ -229,7 +233,7 @@ class GlobalPlanner{
 
             // Create first node, which is current position
             int idOrigin = 0;
-            Node nodeOrigin(mapMsg.origin.position.x,mapMsg.origin.position.y,idOrigin,stepLength);
+            Node nodeOrigin(mapOriginPose.x,mapOriginPose.y,idOrigin,stepLength);
             nodeOrigin.idParent = 0;
             nodeOrigin.cost = 0;
 
@@ -240,8 +244,6 @@ class GlobalPlanner{
             int maxIterationsRrt = 1000;
             for(int iRrt  = 1; iRrt < maxIterationsRrt; iRrt++) {
                 
-                int occupancyProbability = -1;
-                while (occupancyProbability <)
                 int xCell = widthGenerator(rng);
                 int yCell heightGenerator(rng);
 
