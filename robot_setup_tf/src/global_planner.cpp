@@ -196,6 +196,7 @@ class GlobalPlanner{
 
             double xPathPos = xCurrent;
             double yPathPos = yCurrent;
+            nav_msgs::Path path;
 
             double distToGoal = calcDistance(xPathPos,yPathPos,xGoal,yGoal);
 
@@ -220,7 +221,8 @@ class GlobalPlanner{
                 
                 distToGoal = calcDistance(newNode.xPos,newNode.yPos,xGoal,yGoal);
                 if (distToGoal > goalDistThreshold) {
-                    nav_msgs::Path path = createPathToGoal(Tree);
+                    path = createPathToGoal(Tree);
+                    return path;
                     break;
                 }
             }
