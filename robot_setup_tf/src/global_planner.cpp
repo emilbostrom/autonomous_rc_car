@@ -147,7 +147,7 @@ class GlobalPlanner{
             return sqrt(pow((x2-x1),2) + pow((y2-y1),2));
         }
 
-        const nav_msgs::Path createPath(){
+        const nav_msgs::Path createPath(ros::Publisher pub){
             
             nav_msgs::Path path;
             std::vector<geometry_msgs::PoseStamped> posesStampedVectorMsg;
@@ -199,6 +199,7 @@ class GlobalPlanner{
                 /*if (distToGoal > goalDistThreshold) {
                     break;
                 }*/
+                pub.publish(path)
                 ros::Duration(1).sleep();
             }
 
@@ -227,7 +228,7 @@ int main(int argc, char** argv) {
 
     ros::Rate r(10); // 10 hz
 
-    nav_msgs::Path path = planner.createPath();
+    nav_msgs::Path path = planner.createPath(pub);
 
     while(ros::ok()) {
 
