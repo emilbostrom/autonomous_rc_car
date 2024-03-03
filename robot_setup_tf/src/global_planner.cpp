@@ -129,8 +129,8 @@ class GlobalPlanner{
             ROS_INFO_STREAM("Map resolution [m]: " << mapResolution);
             ROS_INFO_STREAM("Map width [cells]: " << mapWidth);
             ROS_INFO_STREAM("Map height [cells]: " << mapHeight);
-
             ROS_INFO_STREAM("Map data size: " << mapData.size());
+            ROS_INFO_STREAM("Map data first value: " << mapData[0]);
             
             uint32_t seed_val = 100;
             rng.seed(seed_val);
@@ -156,6 +156,7 @@ class GlobalPlanner{
             int xMapCell = node.xPos / mapResolution;
             int yMapCell = node.yPos / mapResolution;
             int mapDataIndex = yMapCell*mapHeight + xMapCell;
+            ROS_INFO_STREAM("Map data index: " << mapDataIndex);
             ROS_INFO_STREAM("Node position " << node.xPos << "," << node.yPos <<  " is in mapdata: " << this->mapData[mapDataIndex]);
             if (this->mapData[mapDataIndex] != 0){
                 return true;
