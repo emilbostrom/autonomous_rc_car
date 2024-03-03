@@ -145,9 +145,48 @@ class GlobalPlanner{
             return sqrt(pow((x2-x1),2) + pow((y2-y1),2));
         }
 
+        nav_msgs::Path createPathToGoal(std::vector<Node> Tree) {
+            nav_msgs::Path path;
+
+            Node node = Tree.back();
+            while(node.id != 0) {
+                pose.position.x = node.xPos;
+                pose.position.y = node.yPos;
+                pose.position.z = 0;
+
+                pose.orientation.x = 0.924;
+                pose.orientation.y = 0;
+                pose.orientation.z = 0;
+                pose.orientation.w = 0.383;
+
+                poseStampedMsg.pose = pose;
+
+                posesStampedVectorMsg.push_back(poseStampedMsg);
+
+                node = Tree[node.idParent];
+            }
+            pose.position.x = node.xPos;
+            pose.position.y = node.yPos;
+            pose.position.z = 0;
+
+            pose.orientation.x = 0.924;
+            pose.orientation.y = 0;
+            pose.orientation.z = 0;
+            pose.orientation.w = 0.383;
+
+            poseStampedMsg.pose = pose;
+
+            posesStampedVectorMsg.push_back(poseStampedMsg);
+
+            path.header.frame_id = frameIdMap;
+            path.poses = posesStampedVectorMsg;
+
+            return path;
+        }
+
         const nav_msgs::Path createPath(ros::Publisher pub){
             
-            nav_msgs::Path path;
+
             std::vector<geometry_msgs::PoseStamped> posesStampedVectorMsg;
 
             geometry_msgs::PoseStamped poseStampedMsg;
@@ -180,31 +219,12 @@ class GlobalPlanner{
                 ROS_INFO_STREAM("Added new node to tree: " << newNode.id << " xPos: " 
                                  << newNode.xPos << " yPos: " << newNode.yPos);
                 
-                pose.position.x = newNode.xPos;
-                pose.position.y = newNode.yPos;
-                pose.position.z = 0;
-
-                pose.orientation.x = 0.924;
-                pose.orientation.y = 0;
-                pose.orientation.z = 0;
-                pose.orientation.w = 0.383;
-
-                poseStampedMsg.pose = pose;
-
-                posesStampedVectorMsg.push_back(poseStampedMsg);
-                
-                distToGoal = calcDistance(xPathPos,yPathPos,xGoal,yGoal);
-                /*if (distToGoal > goalDistThreshold) {
+                distToGoal = calcDistance(newNode.xPos,newNode.yPos,xGoal,yGoal);
+                if (distToGoal > goalDistThreshold) {
+                    nav_msgs::Path path = createPathToGoal(Tree)
                     break;
-                }*/
-                path.header.frame_id = frameIdMap;
-                path.poses = posesStampedVectorMsg;
-                pub.publish(path);
-                ros::Duration(1).sleep();
+                }
             }
-
-            //path.header.frame_id = frameIdMap;
-            //path.poses = posesStampedVectorMsg;
             return path;
         }
 
