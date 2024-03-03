@@ -134,7 +134,7 @@ class GlobalPlanner{
                     ROS_INFO_STREAM("index: "<< i);
                     ROS_INFO_STREAM("value: "<< mapData[i]);
                     ROS_INFO_STREAM("x: " << i*mapResolution - mapWidth/2);
-                    ROS_INFO_STREAM("y: " << i % mapHeight);
+                    ROS_INFO_STREAM("y: " << i / mapHeight);
                 }
             }
 
