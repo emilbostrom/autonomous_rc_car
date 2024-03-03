@@ -89,7 +89,7 @@ class GlobalPlanner{
         double mapResolution; // [m/cell]
         int mapWidth; // [cells]
         int mapHeight; // [cells]
-        std::vector<int> mapData; // [0-100] occupancy
+        int mapData[]; // [0-100] occupancy
         geometry_msgs::Pose mapOriginPose; 
         double stepLength; // [m]
         double goalDistThreshold; // [m]
