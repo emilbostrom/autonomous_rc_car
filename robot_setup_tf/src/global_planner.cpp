@@ -151,28 +151,16 @@ class GlobalPlanner{
         }
 
         bool checkForObstacle(Node node) {
-            for (int i = 0; i < this->mapData.size(); i++) {
-                if (this->mapData[i] == 0){
-                    continue;
-                } 
-                
-                int xMapCell;
-                int yMapCell  = i / mapHeight;
-                if (i % mapWidth == 0) {
-                    xMapCell = i;
-                } 
-                else {
-                    xMapCell = i % mapWidth;
-                }
-                
-                auto [xMapPos, yMapPos] = CellToCoordinate(xMapCell,yMapCell);
-                double distToObstacle = calcDistance(xMapPos,yMapPos,node.xPos,node.yPos);
-                
-                if (distToObstacle < obstacleDistThreshold){
-                    return true;
-                }
+            int xMapCell = node.xPos / mapResolution;
+            int yMapCell = node.yPos / mapResolution;
+            int mapDataIndex = yMapCell*mapHeight + xMapCell;
+            
+            if (this->mapData[mapDataIndex] != 0){
+                return true;
             }
-            return false;
+            else {
+                return false;
+            }
         }
 
         nav_msgs::Path createPathToGoal(std::vector<Node> Tree) {
