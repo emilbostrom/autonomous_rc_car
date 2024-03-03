@@ -154,7 +154,7 @@ class GlobalPlanner{
             int xMapCell = node.xPos / mapResolution;
             int yMapCell = node.yPos / mapResolution;
             int mapDataIndex = yMapCell*mapHeight + xMapCell;
-            
+            ROS_INFO_STREAM("Node position " << node.xPos << "," << node.yPos <<  " is in mapdata: " << this->mapData[mapDataIndex]);
             if (this->mapData[mapDataIndex] != 0){
                 return true;
             }
