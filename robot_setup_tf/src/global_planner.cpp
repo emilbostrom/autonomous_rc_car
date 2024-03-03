@@ -133,6 +133,7 @@ class GlobalPlanner{
                 if (mapData[i] != -1) {
                     ROS_INFO_STREAM("index: "<< i);
                     ROS_INFO_STREAM("value: "<< mapData[i]);
+                    ROS_INFO_STREAM("x: " << mapData[i])
                 }
             }
 
@@ -167,7 +168,7 @@ class GlobalPlanner{
             int yMapCell = node.yPos / mapResolution;
             int origoPosition = mapHeight*mapWidth / 2;
 
-            int mapDataIndex = yMapCell + xMapCell*mapHeight + origoPosition - 2048;
+            int mapDataIndex = origoPosition + yMapCell*mapHeight - xMapCell  - 2048;
             
             ROS_INFO_STREAM("Map data index: " << mapDataIndex);
             ROS_INFO_STREAM("Node position " << node.xPos << "," << node.yPos <<  " is in mapdata: " << this->mapData[mapDataIndex]);
