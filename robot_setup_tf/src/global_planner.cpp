@@ -91,6 +91,7 @@ class GlobalPlanner{
         int mapHeight; // [cells]
         double stepLength; // [m]
         double goalDistThreshold; // [m]
+        double obstacleDistThreshold; // [m]
 
         double xCurrent;
         double yCurrent;
@@ -133,6 +134,7 @@ class GlobalPlanner{
 
             stepLength = mapResolution*2;
             goalDistThreshold = stepLength*2;
+            obstacleDistThreshold = stepLength*2;
         }
 
         std::tuple<double, double> CellToCoordinate(int cellWidth, int cellHeight) {
@@ -143,6 +145,31 @@ class GlobalPlanner{
 
         double calcDistance(double x1, double y1, double x2, double y2) {
             return sqrt(pow((x2-x1),2) + pow((y2-y1),2));
+        }
+
+        bool checkForObstacle(Node node) {
+            for (int i = 0; i < mapMsg.data.size(); i++) {
+                if (mapMsg.data[i] == 0){
+                    continue
+                } 
+                
+                int xMapCell;
+                int yMapCell  = i / mapHeight;
+                if (int i % mapWidth == 0) {
+                    xMapCell = i
+                } 
+                else {
+                    xMapCell = i % mapWidth;
+                }
+                
+                auto [xMapPos, yMapPos] = CellToCoordinate(xMapCell,yMapCell);
+                double distToObstacle = calcDistance(xMapPos,yMapPos,node.xPos,node.yPos);
+                
+                if (distToObstacle < obstacleDistThreshold){
+                    return true;
+                }
+            }
+            return false;
         }
 
         nav_msgs::Path createPathToGoal(std::vector<Node> Tree) {
@@ -201,7 +228,8 @@ class GlobalPlanner{
             double distToGoal = calcDistance(xPathPos,yPathPos,xGoal,yGoal);
 
             // Create first node, which is current position
-            Node nodeOrigin(0,0,0,stepLength);
+            int idOrigin = 0;
+            Node nodeOrigin(mapMsg.origin.position.x,mapMsg.origin.position.y,idOrigin,stepLength);
             nodeOrigin.idParent = 0;
             nodeOrigin.cost = 0;
 
@@ -211,9 +239,22 @@ class GlobalPlanner{
 
             int maxIterationsRrt = 1000;
             for(int iRrt  = 1; iRrt < maxIterationsRrt; iRrt++) {
-                auto [xPosNode, yPosNode] = CellToCoordinate(widthGenerator(rng),heightGenerator(rng));
+                
+                int occupancyProbability = -1;
+                while (occupancyProbability <)
+                int xCell = widthGenerator(rng);
+                int yCell heightGenerator(rng);
+
+                auto [xPosNode, yPosNode] = CellToCoordinate(xCell,yCell);
+
                 Node newNode(xPosNode,yPosNode,iRrt,stepLength);
                 newNode.FindNearestNode(Tree);
+
+                bool nodeInObstacle = checkForObstacle(newNode);
+                if (nodeInObstacle) {
+                    continue;
+                }
+ 
                 Tree.push_back(newNode);
 
                 ROS_INFO_STREAM("Added new node to tree: " << newNode.id << " xPos: " 
@@ -223,7 +264,6 @@ class GlobalPlanner{
                 if (distToGoal < goalDistThreshold) {
                     path = createPathToGoal(Tree);
                     return path;
-                    break;
                 }
             }
             return path;
