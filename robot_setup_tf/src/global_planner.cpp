@@ -146,6 +146,14 @@ class GlobalPlanner{
         }
 
         nav_msgs::Path createPathToGoal(std::vector<Node> Tree) {
+            
+            std::vector<geometry_msgs::PoseStamped> posesStampedVectorMsg;
+            
+            geometry_msgs::PoseStamped poseStampedMsg;
+            poseStampedMsg.header.frame_id = frameIdMap;
+            
+            geometry_msgs::Pose pose;
+            
             nav_msgs::Path path;
 
             Node node = Tree.back();
@@ -185,20 +193,11 @@ class GlobalPlanner{
         }
 
         const nav_msgs::Path createPath(ros::Publisher pub){
-            
-
-            std::vector<geometry_msgs::PoseStamped> posesStampedVectorMsg;
-
-            geometry_msgs::PoseStamped poseStampedMsg;
-            poseStampedMsg.header.frame_id = frameIdMap;
-
-            geometry_msgs::Pose pose;
 
             double xPathPos = xCurrent;
             double yPathPos = yCurrent;
 
             double distToGoal = calcDistance(xPathPos,yPathPos,xGoal,yGoal);
-
 
             // Create first node, which is current position
             Node nodeOrigin(0,0,0,stepLength);
@@ -221,7 +220,7 @@ class GlobalPlanner{
                 
                 distToGoal = calcDistance(newNode.xPos,newNode.yPos,xGoal,yGoal);
                 if (distToGoal > goalDistThreshold) {
-                    nav_msgs::Path path = createPathToGoal(Tree)
+                    nav_msgs::Path path = createPathToGoal(Tree);
                     break;
                 }
             }
