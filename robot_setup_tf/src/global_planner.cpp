@@ -89,7 +89,7 @@ class GlobalPlanner{
         double mapResolution; // [m/cell]
         int mapWidth; // [cells]
         int mapHeight; // [cells]
-        int mapData[]; // [0-100] occupancy
+        //int mapData[]; // [0-100] occupancy
         geometry_msgs::Pose mapOriginPose; 
         double stepLength; // [m]
         double goalDistThreshold; // [m]
@@ -124,7 +124,7 @@ class GlobalPlanner{
             mapResolution = mapMsg->info.resolution;
             mapWidth = mapMsg->info.width;
             mapHeight = mapMsg->info.height;
-            mapData = mapMsg->data;
+            int mapData[] = mapMsg->data;
             mapOriginPose = mapMsg->info.origin;
 
             ROS_INFO_STREAM("Map resolution [m]: " << mapResolution);
@@ -152,8 +152,8 @@ class GlobalPlanner{
         }
 
         bool checkForObstacle(Node node) {
-            for (int i = 0; i < mapData.size(); i++) {
-                if (mapData[i] == 0){
+            for (int i = 0; i < this->mapData.size(); i++) {
+                if (this.>mapData[i] == 0){
                     continue;
                 } 
                 
@@ -282,10 +282,10 @@ int main(int argc, char** argv) {
     boost::shared_ptr<geometry_msgs::PoseStamped const> iniPosMsg;
     iniPosMsg = ros::topic::waitForMessage<geometry_msgs::PoseStamped>("slam_out_pose",ros::Duration(2.0));
 
-    boost::shared_ptr<nav_msgs::OccupancyGrid const> mapData;
-    mapData = ros::topic::waitForMessage<nav_msgs::OccupancyGrid>("map",ros::Duration(2.0));
+    boost::shared_ptr<nav_msgs::OccupancyGrid const> mapDataMsg;
+    mapDataMsg = ros::topic::waitForMessage<nav_msgs::OccupancyGrid>("map",ros::Duration(2.0));
 
-    GlobalPlanner planner(iniPosMsg,mapData);
+    GlobalPlanner planner(iniPosMsg,mapDataMsg);
 
     ros::Publisher pub = n.advertise<nav_msgs::Path>("global_path",10);
 
