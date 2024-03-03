@@ -41,6 +41,7 @@ class Node{
         }
 
         void calcNewNodePos(Node nearestNode, double distance) {
+            ROS_INFO_STREAM("Distance to node for connection: " << distance);
             double dx = static_cast<double>(xPos - nearestNode.xPos) / distance;
             double dy = static_cast<double>(yPos - nearestNode.yPos) / distance;
             this->xPos = nearestNode.xPos + dx * stepLength;
@@ -90,7 +91,6 @@ class GlobalPlanner{
         int mapWidth; // [cells]
         int mapHeight; // [cells]
         std::vector<int8_t> mapData; // [0-100] occupancy
-        geometry_msgs::Pose mapOriginPose; 
         double stepLength; // [m]
         double goalDistThreshold; // [m]
         double obstacleDistThreshold; // [m]
@@ -125,7 +125,6 @@ class GlobalPlanner{
             mapWidth = mapMsg->info.width;
             mapHeight = mapMsg->info.height;
             mapData = mapMsg->data;
-            mapOriginPose = mapMsg->info.origin;
 
             ROS_INFO_STREAM("Map resolution [m]: " << mapResolution);
             ROS_INFO_STREAM("Map width [cells]: " << mapWidth);
@@ -233,7 +232,7 @@ class GlobalPlanner{
 
             // Create first node, which is current position
             int idOrigin = 0;
-            Node nodeOrigin(mapOriginPose.position.x,mapOriginPose.position.y,idOrigin,stepLength);
+            Node nodeOrigin(xCurrent,yCurrent,idOrigin,stepLength);
             nodeOrigin.idParent = 0;
             nodeOrigin.cost = 0;
 
@@ -268,6 +267,7 @@ class GlobalPlanner{
                     return path;
                 }
             }
+            path = createPathToGoal(Tree);
             return path;
         }
 
