@@ -10,6 +10,7 @@
 #include <cmath>
 #include <random>
 #include <algorithm> 
+#include <stdlib.h>
 
 
 double xGoal = 5;
@@ -26,26 +27,22 @@ std::vector<geometry_msgs::PoseStamped::ConstPtr> pose;
 
 class Node{
     public:
-        int xCell;
-        int yCell;
         int id;
         int idParent;
         int cost;
         double stepLength;
 
-        double xPos = 0;
-        double yPos = 0;
+        double xPos;
+        double yPos;
         
-        Node(int xCell, int yCell, int id, double stepLength) : xCell(xCell), yCell(yCell), id(id), stepLength(stepLength){
+        Node(int xPos, int yPos, int id, double stepLength) : 
+             xPos(xPos), yPos(yPos), id(id), stepLength(stepLength){
             ROS_INFO_STREAM("Node id: " << this->id);
-            ROS_INFO_STREAM("Width generated: " << this->xCell);
-            ROS_INFO_STREAM("Height generated: " << this->yCell);
         }
 
-        void calcNewNodePos(Node nearestNode) {
-            double pointDistance = calcDistance(xCell,yCell, nearestNode.xCell, nearestNode.yCell);
-            double dx = static_cast<double>(xCell - nearestNode.xCell) / pointDistance;
-            double dy = static_cast<double>(yCell - nearestNode.yCell) / pointDistance;
+        void calcNewNodePos(Node nearestNode, double distance) {
+            double dx = static_cast<double>(xPos - nearestNode.xPos) / distance;
+            double dy = static_cast<double>(yPos - nearestNode.yPos) / distance;
             this->xPos = nearestNode.xPos + dx * stepLength;
             this->yPos = nearestNode.yPos + dy * stepLength;
             ROS_INFO_STREAM("nearestNode.xPos: " << nearestNode.xPos);
@@ -63,13 +60,13 @@ class Node{
         void FindNearestNode(std::vector<Node> Tree) {
             Node nearestNode = Tree[0];
 
-            double nearestDist = calcDistance(xCell,yCell,Tree[0].xCell,Tree[0].yCell);
+            double nearestDist = calcDistance(xPos,yPos,Tree[0].xPos,Tree[0].yPos);
             ROS_INFO_STREAM("Distance between node and start node: " << nearestDist);
 
             ROS_INFO_STREAM("Tree size: " << Tree.size());
 
             for(int i = 1; i < Tree.size(); i++) {
-                double dist = calcDistance(xCell,yCell,Tree[i].xCell,Tree[i].yCell);
+                double dist = calcDistance(xPos,yPos,Tree[i].xPos,Tree[i].yPos);
                 if (dist < nearestDist) {
                     nearestNode = Tree[i];
                     nearestDist = dist;
@@ -80,7 +77,7 @@ class Node{
 
             this->idParent = nearestNode.id;
 
-            calcNewNodePos(nearestNode);
+            calcNewNodePos(nearestNode,nearestDist);
         }
 
 };
@@ -138,6 +135,12 @@ class GlobalPlanner{
             goalDistThreshold = stepLength*2;
         }
 
+        std::tuple<double, double> CellToCoordinate(cellWidth, cellHeight) {
+            double xPos = (cellWidth - mapWidth/2)*mapResolution;
+            double yPos = (cellHeight - mapHeight/2)*mapResolution;
+            return {xPos, yPos};
+        }
+
         double calcDistance(double x1, double y1, double x2, double y2) {
             return sqrt(pow((x2-x1),2) + pow((y2-y1),2));
         }
@@ -159,7 +162,7 @@ class GlobalPlanner{
 
 
             // Create first node, which is current position
-            Node nodeOrigin(mapWidth/2,mapHeight/2,0,stepLength);
+            Node nodeOrigin(0,0,0,stepLength);
             nodeOrigin.idParent = 0;
             nodeOrigin.cost = 0;
 
@@ -169,18 +172,17 @@ class GlobalPlanner{
 
             int maxIterationsRrt = 1000;
             for(int iRrt  = 1; iRrt < maxIterationsRrt; iRrt++) {
-                Node newNode(widthGenerator(rng),heightGenerator(rng),iRrt,stepLength);
-                
+                auto [xPosNode, yPosNode] = CellToCoordinate(widthGenerator(rng),heightGenerator(rng));
+                Node newNode(xPosNode,yPosNode,iRrt,stepLength);
                 newNode.FindNearestNode(Tree);
                 Tree.push_back(newNode);
 
-                ROS_INFO_STREAM("Added new node to tree: " << newNode.id << " xPos: " << newNode.xPos << " yPos: " << newNode.yPos);
+                ROS_INFO_STREAM("Added new node to tree: " << newNode.id << " xPos: " 
+                                 << newNode.xPos << " yPos: " << newNode.yPos);
                 
                 pose.position.x = newNode.xPos;
                 pose.position.y = newNode.yPos;
                 pose.position.z = 0;
-
-                if (newNode.xPos)
 
                 pose.orientation.x = 0.924;
                 pose.orientation.y = 0;
