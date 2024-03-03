@@ -199,6 +199,7 @@ class GlobalPlanner{
                 /*if (distToGoal > goalDistThreshold) {
                     break;
                 }*/
+                ros::Duration(1).sleep();
             }
 
             path.header.frame_id = frameIdMap;
