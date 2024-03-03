@@ -89,7 +89,7 @@ class GlobalPlanner{
         double mapResolution; // [m/cell]
         int mapWidth; // [cells]
         int mapHeight; // [cells]
-        int[] mapData; // [0-100] occupancy
+        std::vector<int> mapData; // [0-100] occupancy
         geometry_msgs::Pose mapOriginPose; 
         double stepLength; // [m]
         double goalDistThreshold; // [m]
@@ -233,7 +233,7 @@ class GlobalPlanner{
 
             // Create first node, which is current position
             int idOrigin = 0;
-            Node nodeOrigin(mapOriginPose.x,mapOriginPose.y,idOrigin,stepLength);
+            Node nodeOrigin(mapOriginPose.position.x,mapOriginPose.position.y,idOrigin,stepLength);
             nodeOrigin.idParent = 0;
             nodeOrigin.cost = 0;
 
@@ -245,7 +245,7 @@ class GlobalPlanner{
             for(int iRrt  = 1; iRrt < maxIterationsRrt; iRrt++) {
                 
                 int xCell = widthGenerator(rng);
-                int yCell heightGenerator(rng);
+                int yCell = heightGenerator(rng);
 
                 auto [xPosNode, yPosNode] = CellToCoordinate(xCell,yCell);
 
