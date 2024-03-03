@@ -129,11 +129,16 @@ class GlobalPlanner{
                 mapData.push_back(static_cast<int>(value));
             }
 
+            for(int i = 0; i < mapMsg.size();i++){
+                ROS_INFO_STREAM("index: "<< i);
+                ROS_INFO_STREAM("value: "<<mapMsg[i]);
+            }
+
             ROS_INFO_STREAM("Map resolution [m]: " << mapResolution);
             ROS_INFO_STREAM("Map width [cells]: " << mapWidth);
             ROS_INFO_STREAM("Map height [cells]: " << mapHeight);
             ROS_INFO_STREAM("Map data size: " << mapData.size());
-            ROS_INFO_STREAM("Map data first value: " << static_cast<int>(mapData[0]));
+            ROS_INFO_STREAM("Map data first value: " << mapData[0]);
             
             uint32_t seed_val = 100;
             rng.seed(seed_val);
