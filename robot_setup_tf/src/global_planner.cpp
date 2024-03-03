@@ -199,7 +199,7 @@ class GlobalPlanner{
                 /*if (distToGoal > goalDistThreshold) {
                     break;
                 }*/
-                pub.publish(path)
+                pub.publish(path);
                 ros::Duration(1).sleep();
             }
 
