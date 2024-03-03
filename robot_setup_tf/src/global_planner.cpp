@@ -133,7 +133,8 @@ class GlobalPlanner{
                 if (mapData[i] != -1) {
                     ROS_INFO_STREAM("index: "<< i);
                     ROS_INFO_STREAM("value: "<< mapData[i]);
-                    ROS_INFO_STREAM("y: " << mapData[i] % 2048 - 1024*0.05);
+                    ROS_INFO_STREAM("x: " << i*mapResolution - mapWidth/2);
+                    ROS_INFO_STREAM("y: " << i % mapHeight);
                 }
             }
 
