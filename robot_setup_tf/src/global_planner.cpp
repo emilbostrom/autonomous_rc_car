@@ -131,6 +131,7 @@ class GlobalPlanner{
             ROS_INFO_STREAM("Map height [cells]: " << mapHeight);
             ROS_INFO_STREAM("Map data size: " << mapData.size());
             ROS_INFO_STREAM("Map data first value: " << mapData[0]);
+            ROS_INFO_STREAM("mapMsg->data first value: " << mapMsg->data[0]);
             
             uint32_t seed_val = 100;
             rng.seed(seed_val);
