@@ -125,7 +125,9 @@ class GlobalPlanner{
             mapResolution = mapMsg->info.resolution;
             mapWidth = mapMsg->info.width;
             mapHeight = mapMsg->info.height;
-            mapData(mapMsg->data.begin(), mapMsg->data.end());
+            for (const auto& value : mapMsg->data) {
+                mapData.push_back(static_cast<int>(value));
+            }
 
             ROS_INFO_STREAM("Map resolution [m]: " << mapResolution);
             ROS_INFO_STREAM("Map width [cells]: " << mapWidth);
