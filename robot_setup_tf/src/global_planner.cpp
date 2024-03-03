@@ -124,7 +124,7 @@ class GlobalPlanner{
             mapResolution = mapMsg->info.resolution;
             mapWidth = mapMsg->info.width;
             mapHeight = mapMsg->info.height;
-            std::vector<int> mapData = mapMsg->data;
+            std::vector<int8_t> mapData = mapMsg->data;
             mapOriginPose = mapMsg->info.origin;
 
             ROS_INFO_STREAM("Map resolution [m]: " << mapResolution);
@@ -153,7 +153,7 @@ class GlobalPlanner{
 
         bool checkForObstacle(Node node) {
             for (int i = 0; i < this->mapData.size(); i++) {
-                if (this.>mapData[i] == 0){
+                if (this->mapData[i] == 0){
                     continue;
                 } 
                 
