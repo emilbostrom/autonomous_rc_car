@@ -60,8 +60,9 @@ class Node{
         void FindNearestNode(std::vector<Node> Tree) {
             Node nearestNode = Tree[0];
 
+            ROS_INFO_STREAM("Node " << id << " has position " << xPos << "," << yPos);
+
             double nearestDist = calcDistance(xPos,yPos,Tree[0].xPos,Tree[0].yPos);
-            ROS_INFO_STREAM("Distance between node and start node: " << nearestDist);
 
             ROS_INFO_STREAM("Tree size: " << Tree.size());
 
@@ -73,7 +74,8 @@ class Node{
                 }
             }
 
-            ROS_INFO_STREAM("Nearest node to " << id << " is " << nearestNode.id);
+            ROS_INFO_STREAM("Nearest node to " << id << " is " << nearestNode.id 
+                            << "with distance: " << nearestDist);
 
             this->idParent = nearestNode.id;
 
