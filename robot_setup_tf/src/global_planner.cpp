@@ -199,12 +199,14 @@ class GlobalPlanner{
                 /*if (distToGoal > goalDistThreshold) {
                     break;
                 }*/
+                path.header.frame_id = frameIdMap;
+                path.poses = posesStampedVectorMsg;
                 pub.publish(path);
                 ros::Duration(1).sleep();
             }
 
-            path.header.frame_id = frameIdMap;
-            path.poses = posesStampedVectorMsg;
+            //path.header.frame_id = frameIdMap;
+            //path.poses = posesStampedVectorMsg;
             return path;
         }
 
