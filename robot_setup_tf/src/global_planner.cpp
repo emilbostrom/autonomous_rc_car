@@ -90,11 +90,13 @@ class GlobalPlanner{
         double mapResolution; // [m/cell]
         int mapWidth; // [cells]
         int mapHeight; // [cells]
+        geometry_msgs::Pose mapOriginPose;
         //std::vector<int8_t> mapDataFetch; // [0-100] occupancy
         std::vector<int> mapData;
         double stepLength; // [m]
         double goalDistThreshold; // [m]
         double obstacleDistThreshold; // [m]
+
 
         double xCurrent;
         double yCurrent;
@@ -125,6 +127,7 @@ class GlobalPlanner{
             mapResolution = mapMsg->info.resolution;
             mapWidth = mapMsg->info.width;
             mapHeight = mapMsg->info.height;
+            mapOriginPose = mapMsg->.info.origin;
             for (const auto& value : mapMsg->data) {
                 mapData.push_back(static_cast<int>(value));
             }
@@ -133,7 +136,7 @@ class GlobalPlanner{
                 if (mapData[i] != -1) {
                     ROS_INFO_STREAM("index: "<< i);
                     ROS_INFO_STREAM("value: "<< mapData[i]);
-                    ROS_INFO_STREAM("x: " << i*mapResolution - mapWidth/2);
+                    ROS_INFO_STREAM("x: " << i % mapHeight);
                     ROS_INFO_STREAM("y: " << i / mapHeight);
                 }
             }
@@ -154,9 +157,9 @@ class GlobalPlanner{
             obstacleDistThreshold = stepLength*2;
         }
 
-        std::tuple<double, double> CellToCoordinate(int cellWidth, int cellHeight) {
-            double xPos = (cellWidth - mapWidth/2)*mapResolution;
-            double yPos = (cellHeight - mapHeight/2)*mapResolution;
+        std::tuple<double, double> CellToCoordinate(int xCell, int yCell) {
+            double xPos = (xCell - mapWidth/2)*mapResolution;
+            double yPos = (yCell - mapHeight/2)*mapResolution;
             return {xPos, yPos};
         }
 
@@ -165,11 +168,10 @@ class GlobalPlanner{
         }
 
         bool checkForObstacle(Node node) {
-            int xMapCell = node.xPos / mapResolution;
-            int yMapCell = node.yPos / mapResolution;
-            int origoPosition = mapHeight*mapWidth / 2;
+            int xMapCell = node.xPos / mapResolution + mapWidth/2;
+            int yMapCell = node.yPos / mapResolution + mapHeight/2;
 
-            int mapDataIndex = origoPosition + yMapCell*mapHeight - xMapCell  - 2048;
+            int mapDataIndex = yMapCell*mapHeight + xMapCell;
             
             ROS_INFO_STREAM("Map data index: " << mapDataIndex);
             ROS_INFO_STREAM("Node position " << node.xPos << "," << node.yPos <<  " is in mapdata: " << this->mapData[mapDataIndex]);
