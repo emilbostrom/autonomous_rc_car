@@ -243,7 +243,7 @@ class GlobalPlanner{
             std::vector<Node> Tree;
             Tree.push_back(nodeOrigin);
 
-            int maxIterationsRrt = 1000;
+            int maxIterationsRrt = 2000;
             for(int iRrt  = 1; iRrt < maxIterationsRrt; iRrt++) {
                 
                 int xCell = widthGenerator(rng);
