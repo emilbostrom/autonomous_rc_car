@@ -114,7 +114,7 @@ class GlobalPlanner{
 
         GlobalPlanner(const geometry_msgs::PoseStamped::ConstPtr& poseMsg, 
                       const nav_msgs::OccupancyGrid::ConstPtr& mapMsg,
-                      const geometry_msgs::Pose::ConstPtr& goalMsg) {
+                      const geometry_msgs::PoseStamped::ConstPtr& goalMsg) {
             
             ROS_INFO_STREAM("Received pose: " << poseMsg);
             xCurrent = poseMsg->pose.position.x;
@@ -125,13 +125,13 @@ class GlobalPlanner{
             zQuat = poseMsg->pose.orientation.z;
             wQuat = poseMsg->pose.orientation.w;
 
-            xGoal = goalMsg->position.x;
-            yGoal = goalMsg->position.y;
-            z_goal = goalMsg->position.z;
-            x_quat_goal = goalMsg->orientation.x;
-            y_quat_goal = goalMsg->orientation.y;
-            z_quat_goal = goalMsg->orientation.z;
-            w_quat_goal = goalMsg->orientation.w;
+            xGoal = goalMsg->pose.position.x;
+            yGoal = goalMsg->pose.position.y;
+            z_goal = goalMsg->pose.position.z;
+            x_quat_goal = goalMsg->pose.orientation.x;
+            y_quat_goal = goalMsg->pose.orientation.y;
+            z_quat_goal = goalMsg->pose.orientation.z;
+            w_quat_goal = goalMsg->pose.orientation.w;
 
             mapResolution = mapMsg->info.resolution;
             mapWidth = mapMsg->info.width;
@@ -306,8 +306,8 @@ int main(int argc, char** argv) {
     boost::shared_ptr<nav_msgs::OccupancyGrid const> mapDataMsg;
     mapDataMsg = ros::topic::waitForMessage<nav_msgs::OccupancyGrid>("map",ros::Duration(2.0));
 
-    boost::shared_ptr<geometry_msgs::Pose const> goalPosMsg;
-    goalPosMsg = ros::topic::waitForMessage<geometry_msgs::Pose>("move_base_simple/goal",ros::Duration(30.0));
+    boost::shared_ptr<geometry_msgs::PoseStamped const> goalPosMsg;
+    goalPosMsg = ros::topic::waitForMessage<geometry_msgs::PoseStamped>("/move_base_simple/goal",ros::Duration(30.0));
 
     GlobalPlanner planner(iniPosMsg,mapDataMsg,goalPosMsg);
 
