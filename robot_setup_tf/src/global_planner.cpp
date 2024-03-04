@@ -193,8 +193,12 @@ class GlobalPlanner{
             
             nav_msgs::Path path;
 
-            Node node = Tree.back();
-            while(node.id != 0) {
+            Node nodePrev = Tree.back();
+            
+            for (const auto& nodeIter : Tree) {
+                if(nodeIter.id != nodePrev.idParent) {
+                    continue;
+                }
                 pose.position.x = node.xPos;
                 pose.position.y = node.yPos;
                 pose.position.z = 0;
@@ -209,19 +213,9 @@ class GlobalPlanner{
                 posesStampedVectorMsg.push_back(poseStampedMsg);
 
                 node = Tree[node.idParent];
+
+                nodePrev = nodeIter;
             }
-            pose.position.x = node.xPos;
-            pose.position.y = node.yPos;
-            pose.position.z = 0;
-
-            pose.orientation.x = 0.924;
-            pose.orientation.y = 0;
-            pose.orientation.z = 0;
-            pose.orientation.w = 0.383;
-
-            poseStampedMsg.pose = pose;
-
-            posesStampedVectorMsg.push_back(poseStampedMsg);
 
             path.header.frame_id = frameIdMap;
             path.poses = posesStampedVectorMsg;
