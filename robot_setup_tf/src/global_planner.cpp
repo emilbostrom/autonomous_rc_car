@@ -13,16 +13,6 @@
 #include <stdlib.h>
 
 
-double xGoal = 0.5;
-double yGoal = 3;
-double z_goal = 0;
-double x_quat_goal = 0.707;
-double y_quat_goal = 0;
-double z_quat_goal = 0;
-double w_quat_goal = 0.707;
-
-
-
 std::vector<geometry_msgs::PoseStamped::ConstPtr> pose;
 
 class Node{
@@ -105,6 +95,14 @@ class GlobalPlanner{
         double zQuat;
         double wQuat;
 
+        double xGoal;
+        double yGoal;
+        double z_goal;
+        double x_quat_goal;
+        double y_quat_goal;
+        double z_quat_goal;
+        double w_quat_goal;
+
         typedef std::mt19937 MyRNG;
         MyRNG rng;
 
@@ -115,7 +113,8 @@ class GlobalPlanner{
         int goalBias = 10; // Tuning parameter
 
         GlobalPlanner(const geometry_msgs::PoseStamped::ConstPtr& poseMsg, 
-                      const nav_msgs::OccupancyGrid::ConstPtr& mapMsg) {
+                      const nav_msgs::OccupancyGrid::ConstPtr& mapMsg,
+                      const geometry_msgs::PoseStamped::ConstPtr& goalMsg) {
             
             ROS_INFO_STREAM("Received pose: " << poseMsg);
             xCurrent = poseMsg->pose.position.x;
@@ -125,6 +124,14 @@ class GlobalPlanner{
             yQuat = poseMsg->pose.orientation.y;
             zQuat = poseMsg->pose.orientation.z;
             wQuat = poseMsg->pose.orientation.w;
+
+            xGoal = goalMsg->pose.position.x;
+            yGoal = goalMsg->pose.position.y;
+            z_goal = goalMsg->pose.position.z;
+            x_quat_goal = goalMsg->pose.orientation.x;
+            y_quat_goal = goalMsg->pose.orientation.y;
+            z_quat_goal = goalMsg->pose.orientation.z;
+            w_quat_goal = goalMsg->pose.orientation.w;
 
             mapResolution = mapMsg->info.resolution;
             mapWidth = mapMsg->info.width;
@@ -299,7 +306,10 @@ int main(int argc, char** argv) {
     boost::shared_ptr<nav_msgs::OccupancyGrid const> mapDataMsg;
     mapDataMsg = ros::topic::waitForMessage<nav_msgs::OccupancyGrid>("map",ros::Duration(2.0));
 
-    GlobalPlanner planner(iniPosMsg,mapDataMsg);
+    boost::shared_ptr<geometry_msgs::PoseStamped const> iniPosMsg;
+    goalPosMsg = ros::topic::waitForMessage<geometry_msgs::PoseStamped>("move_base_simple/goal",ros::Duration(30.0));
+
+    GlobalPlanner planner(iniPosMsg,mapDataMsg,goalPosMsg);
 
     ros::Publisher pub = n.advertise<nav_msgs::Path>("global_path",10);
 
