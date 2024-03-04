@@ -27,9 +27,14 @@ std::vector<geometry_msgs::PoseStamped::ConstPtr> pose;
 
 class Node{
     public:
+        int id;
         int idParent;
         int cost;
+        double stepLength;
 
+        double xPos;
+        double yPos;
+        
         Node(double xPos, double yPos, int id, double stepLength) : 
              xPos(xPos), yPos(yPos), id(id), stepLength(stepLength){
             ROS_INFO_STREAM("Node id: " << this->id);
