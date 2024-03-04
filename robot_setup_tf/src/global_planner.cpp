@@ -114,7 +114,7 @@ class GlobalPlanner{
 
         GlobalPlanner(const geometry_msgs::PoseStamped::ConstPtr& poseMsg, 
                       const nav_msgs::OccupancyGrid::ConstPtr& mapMsg,
-                      const geometry_msgs::PoseStamped::ConstPtr& goalMsg) {
+                      const geometry_msgs::Pose::ConstPtr& goalMsg) {
             
             ROS_INFO_STREAM("Received pose: " << poseMsg);
             xCurrent = poseMsg->pose.position.x;
