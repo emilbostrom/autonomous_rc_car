@@ -195,7 +195,7 @@ class GlobalPlanner{
 
             Node nodePrev = Tree.back();
             ROS_INFO_STREAM("First node id: " << nodePrev.id);
-            ROS_INFO_STREAM("First node parent id: " << nodePrev.parentId);
+            ROS_INFO_STREAM("First node parent id: " << nodePrev.idParent);
             
             for (const auto& node : Tree) {
                 ROS_INFO_STREAM("Node id: " << node.id);
