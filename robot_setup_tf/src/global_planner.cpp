@@ -111,7 +111,7 @@ class GlobalPlanner{
         std::uniform_int_distribution<uint32_t> widthGenerator;
         std::uniform_int_distribution<uint32_t> heightGenerator;
 
-        std::uniform_int_distribution<uint32_t> nodeIsGoalBias std::uniform_int_distribution<uint32_t>(0, 99);
+        std::uniform_int_distribution<uint32_t> nodeIsGoalBias(0, 99);
         int goalBias = 10; // Tuning parameter
 
         GlobalPlanner(const geometry_msgs::PoseStamped::ConstPtr& poseMsg, 
