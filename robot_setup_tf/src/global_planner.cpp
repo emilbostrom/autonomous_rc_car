@@ -125,13 +125,13 @@ class GlobalPlanner{
             zQuat = poseMsg->pose.orientation.z;
             wQuat = poseMsg->pose.orientation.w;
 
-            xGoal = goalMsg->pose.position.x;
-            yGoal = goalMsg->pose.position.y;
-            z_goal = goalMsg->pose.position.z;
-            x_quat_goal = goalMsg->pose.orientation.x;
-            y_quat_goal = goalMsg->pose.orientation.y;
-            z_quat_goal = goalMsg->pose.orientation.z;
-            w_quat_goal = goalMsg->pose.orientation.w;
+            xGoal = goalMsg->position.x;
+            yGoal = goalMsg->position.y;
+            z_goal = goalMsg->position.z;
+            x_quat_goal = goalMsg->orientation.x;
+            y_quat_goal = goalMsg->orientation.y;
+            z_quat_goal = goalMsg->orientation.z;
+            w_quat_goal = goalMsg->orientation.w;
 
             mapResolution = mapMsg->info.resolution;
             mapWidth = mapMsg->info.width;
