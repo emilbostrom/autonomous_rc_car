@@ -194,8 +194,11 @@ class GlobalPlanner{
             nav_msgs::Path path;
 
             Node nodePrev = Tree.back();
+            ROS_INFO_STREAM("First node id: " << nodePrev.id);
+            ROS_INFO_STREAM("First node parent id: " << nodePrev.parentId);
             
             for (const auto& node : Tree) {
+                ROS_INFO_STREAM("Node id: " << node.id);
                 if(node.id != nodePrev.idParent) {
                     continue;
                 }
