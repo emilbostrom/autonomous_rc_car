@@ -195,8 +195,8 @@ class GlobalPlanner{
 
             Node nodePrev = Tree.back();
             
-            for (const auto& nodeIter : Tree) {
-                if(nodeIter.id != nodePrev.idParent) {
+            for (const auto& node : Tree) {
+                if(node.id != nodePrev.idParent) {
                     continue;
                 }
                 pose.position.x = node.xPos;
@@ -214,7 +214,7 @@ class GlobalPlanner{
 
                 node = Tree[node.idParent];
 
-                nodePrev = nodeIter;
+                nodePrev = node;
             }
 
             path.header.frame_id = frameIdMap;
