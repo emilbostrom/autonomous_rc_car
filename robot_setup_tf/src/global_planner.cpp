@@ -197,7 +197,8 @@ class GlobalPlanner{
             ROS_INFO_STREAM("First node id: " << nodePrev.id);
             ROS_INFO_STREAM("First node parent id: " << nodePrev.idParent);
             
-            for (const auto& node : Tree) {
+            for (int i = Tree.size() - 1; i >= 0; --i) {
+                Node node = Tree[i];
                 ROS_INFO_STREAM("Node id: " << node.id);
                 if(node.id != nodePrev.idParent) {
                     continue;
