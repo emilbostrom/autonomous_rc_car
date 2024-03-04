@@ -68,8 +68,8 @@ class Node{
                 if (dist < nearestDist) {
                     nearestNode = Tree[i];
                     nearestDist = dist;
-                    ROS_INFO_STREAM("New nearest node id: " << nearestNode.id);
-                    ROS_INFO_STREAM("The distance to above is: " << nearestDist);
+                    //ROS_INFO_STREAM("New nearest node id: " << nearestNode.id);
+                    //ROS_INFO_STREAM("The distance to above is: " << nearestDist);
                 }
             }
 
@@ -130,14 +130,14 @@ class GlobalPlanner{
                 mapData.push_back(static_cast<int>(value));
             }
 
-            for(int i = 0; i < mapData.size();i++){
+            /*for(int i = 0; i < mapData.size();i++){
                 if (mapData[i] != -1) {
                     ROS_INFO_STREAM("index: "<< i);
                     ROS_INFO_STREAM("value: "<< mapData[i]);
                     ROS_INFO_STREAM("x: " << i % mapHeight);
                     ROS_INFO_STREAM("y: " << i / mapHeight);
                 }
-            }
+            }*/
 
             ROS_INFO_STREAM("Map resolution [m]: " << mapResolution);
             ROS_INFO_STREAM("Map width [cells]: " << mapWidth);
@@ -171,8 +171,8 @@ class GlobalPlanner{
 
             int mapDataIndex = yMapCell*mapHeight + xMapCell;
             
-            ROS_INFO_STREAM("Map data index: " << mapDataIndex);
-            ROS_INFO_STREAM("Node position " << node.xPos << "," << node.yPos <<  " is in mapdata: " << this->mapData[mapDataIndex]);
+            //ROS_INFO_STREAM("Map data index: " << mapDataIndex);
+            //ROS_INFO_STREAM("Node position " << node.xPos << "," << node.yPos <<  " is in mapdata: " << this->mapData[mapDataIndex]);
             if (this->mapData[mapDataIndex] != 0){
                 return true;
             } else {
