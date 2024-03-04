@@ -182,6 +182,8 @@ class GlobalPlanner{
 
         nav_msgs::Path createPathToGoal(std::vector<Node> Tree) {
             
+            ROS_INFO_STREAM("Goal node reached, creating path msg");
+
             std::vector<geometry_msgs::PoseStamped> posesStampedVectorMsg;
             
             geometry_msgs::PoseStamped poseStampedMsg;
