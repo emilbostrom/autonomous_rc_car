@@ -90,7 +90,6 @@ class GlobalPlanner{
         double mapResolution; // [m/cell]
         int mapWidth; // [cells]
         int mapHeight; // [cells]
-        geometry_msgs::Pose mapOriginPose;
         //std::vector<int8_t> mapDataFetch; // [0-100] occupancy
         std::vector<int> mapData;
         double stepLength; // [m]
@@ -127,7 +126,6 @@ class GlobalPlanner{
             mapResolution = mapMsg->info.resolution;
             mapWidth = mapMsg->info.width;
             mapHeight = mapMsg->info.height;
-            mapOriginPose = mapMsg->.info.origin;
             for (const auto& value : mapMsg->data) {
                 mapData.push_back(static_cast<int>(value));
             }
