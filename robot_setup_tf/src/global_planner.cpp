@@ -212,8 +212,6 @@ class GlobalPlanner{
 
                 posesStampedVectorMsg.push_back(poseStampedMsg);
 
-                node = Tree[node.idParent];
-
                 nodePrev = node;
             }
 
