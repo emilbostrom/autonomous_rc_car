@@ -306,7 +306,7 @@ int main(int argc, char** argv) {
     boost::shared_ptr<nav_msgs::OccupancyGrid const> mapDataMsg;
     mapDataMsg = ros::topic::waitForMessage<nav_msgs::OccupancyGrid>("map",ros::Duration(2.0));
 
-    boost::shared_ptr<geometry_msgs::PoseStamped const> iniPosMsg;
+    boost::shared_ptr<geometry_msgs::PoseStamped const> goalPosMsg;
     goalPosMsg = ros::topic::waitForMessage<geometry_msgs::PoseStamped>("move_base_simple/goal",ros::Duration(30.0));
 
     GlobalPlanner planner(iniPosMsg,mapDataMsg,goalPosMsg);
