@@ -75,6 +75,7 @@ class Node{
         double stepLength;
 
         double headingAngle;
+        double maxAngleDiff = PI/4; // TUNING PARAM
 
         double xPos;
         double yPos;
@@ -92,6 +93,22 @@ class Node{
             this->yPos = nearestNode.yPos + dy * stepLength;
             ROS_INFO_STREAM("new xPos: " << this->xPos);
             ROS_INFO_STREAM("new yPos: " << this->yPos);
+        }
+
+        bool checkDynamicConstraints(Node nodeParent){
+
+            double xDelta = this->xPos - nodeParent.xPos;
+            double yDelta = this->yPos - nodeParent.yPos;
+            double nodeHeading = atan2((yDelta), xDelta);
+            ROS_INFO_STREAM("Node heading cal: " << nodeHeading);
+            double headingDiff = PI/2 - abs(abs(nodeHeading - nodeParent.headingAngle) - PI/2); 
+            ROS_INFO_STREAM("Node heading diff: " << headingDiff);
+            if (headingDiff < maxAngleDiff) {
+                this->headingAngle = nodeHeading;
+                return false;
+            }
+            
+            return true;
         }
 
         double calcDistance(double x1, double y1, double x2, double y2) {
@@ -141,8 +158,6 @@ class GlobalPlanner{
         double stepLength; // [m]
         double goalDistThreshold; // [m]
         double obstacleDistThreshold; // [m]
-        
-        double maxAngleDiff = PI/2; // [rad] TUNING PARAMETER!!!
 
         double xCurrent;
         double yCurrent;
@@ -250,22 +265,6 @@ class GlobalPlanner{
             }
         }
 
-        bool checkDynamicConstraints(Node node, Node nodeParent){
-
-            double xDelta = node.xPos - nodeParent.xPos;
-            double yDelta = node.yPos - nodeParent.yPos;
-            double nodeHeading = atan2((yDelta), xDelta);
-            ROS_INFO_STREAM("Node heading cal: " << nodeHeading);
-            double headingDiff = PI/2 - abs(abs(nodeHeading - nodeParent.headingAngle) - PI/2); 
-            ROS_INFO_STREAM("Node heading diff: " << headingDiff);
-            if (headingDiff < maxAngleDiff) {
-                node.headingAngle = nodeHeading;
-                return false;
-            }
-            
-            return true;
-        }
-
         nav_msgs::Path createPathToGoal(std::vector<Node> Tree) {
             
             ROS_INFO_STREAM("Goal node reached, creating path msg");
@@ -361,7 +360,7 @@ class GlobalPlanner{
                 Node newNode(xPosNode,yPosNode,iRrt,stepLength);
                 Node parentNode = newNode.FindNearestNode(Tree);
 
-                bool dynamicConstraint = checkDynamicConstraints(newNode,parentNode);
+                bool dynamicConstraint = newNode.checkDynamicConstraints(parentNode);
                 if (dynamicConstraint) {
                     ROS_INFO_STREAM("Node does not meet dynamic constraints, skipped");
                     continue;
