@@ -139,7 +139,7 @@ class GlobalPlanner{
         double goalDistThreshold; // [m]
         double obstacleDistThreshold; // [m]
         
-        double maxAngleDiff = 0.2 // [rad] TUNING PARAMETER!!!
+        double maxAngleDiff = 0.2; // [rad] TUNING PARAMETER!!!
 
         double xCurrent;
         double yCurrent;
@@ -286,7 +286,8 @@ class GlobalPlanner{
                 pose.position.z = 0;
 
                 Quaternion quat = ToQuaternion(0, 0, node.headingAngle);
-                ROS_INFO_STREAM("Quaternion: " << quat);
+                ROS_INFO_STREAM("Quaternion: x: " << quat.x << " y: " << quat.y << " z: " 
+                                 << quat.z << " w: " << quat.w);
 
                 pose.orientation.x = quat.x;
                 pose.orientation.y = quat.y;
