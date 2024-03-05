@@ -299,6 +299,7 @@ class GlobalPlanner{
                 quat.setRPY(0,0,node.headingAngle);
                 quat=quat.normalize();
 
+                ROS_INFO_STREAM("Node heading angle: " << node.headingAngle)
                 ROS_INFO_STREAM("Quaternion: x: " << quat.getX() << " y: " << quat.getY() << " z: " 
                                  << quat.getZ() << " w: " << quat.getW());
 
