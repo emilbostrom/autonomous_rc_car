@@ -11,6 +11,7 @@
 #include <random>
 #include <algorithm> 
 #include <stdlib.h>
+#include <tf2/LinearMath/Quaternion.h>
 
 #define PI 3.14159265
 
@@ -292,7 +293,12 @@ class GlobalPlanner{
                 pose.position.y = node.yPos;
                 pose.position.z = 0;
 
-                Quaternion quat = ToQuaternion(0, 0, node.headingAngle);
+                // Quaternion quat = ToQuaternion(0, 0, node.headingAngle);
+
+                tf2::Quaternion quat;
+                quat.setRPY(0,0,node.headingAngle);
+                quat=myQuaternion.normalize();
+
                 ROS_INFO_STREAM("Quaternion: x: " << quat.x << " y: " << quat.y << " z: " 
                                  << quat.z << " w: " << quat.w);
 
