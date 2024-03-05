@@ -253,7 +253,8 @@ class GlobalPlanner{
             double xDelta = node.xPos - nodeParent.xPos;
             double yDelta = node.yPos - nodeParent.yPos;
             double nodeHeading = atan(yDelta/xDelta);
-            double headingDiff = abs(nodeHeading - nodeParent.headingAngle);
+            double coordDiff = 3.14159; // CURRENTLY SOME ISSUE WITH CORRD BE WARE
+            double headingDiff = abs(nodeHeading - nodeParent.headingAngle - coordDiff);
             ROS_INFO_STREAM("Node heading diff: " << headingDiff);
             if (headingDiff < maxAngleDiff) {
                 node.headingAngle = nodeHeading;
@@ -371,7 +372,8 @@ class GlobalPlanner{
                 
                 distToGoal = calcDistance(newNode.xPos,newNode.yPos,xGoal,yGoal);
                 
-                double headingDiffToGoal = abs(newNode.headingAngle - goalEuler.yaw);
+                double coordDiff = 3.14159; // COORD PROBLEM CURRENTLY BE WARE CHECK FUTURE!!!!
+                double headingDiffToGoal = abs(newNode.headingAngle - goalEuler.yaw - coordDiff);
                 if (distToGoal < goalDistThreshold && headingDiffToGoal < maxAngleDiff) {
                     path = createPathToGoal(Tree);
                     return path;
