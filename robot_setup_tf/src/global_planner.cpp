@@ -14,6 +14,7 @@
 #include <tf2/LinearMath/Quaternion.h>
 
 #define PI 3.14159265
+#define MAX_ANGLE_DIFF = PI/4; // TUNING PARAM
 
 
 std::vector<geometry_msgs::PoseStamped::ConstPtr> pose;
@@ -75,7 +76,6 @@ class Node{
         double stepLength;
 
         double headingAngle;
-        double maxAngleDiff = PI/4; // TUNING PARAM
 
         double xPos;
         double yPos;
@@ -103,7 +103,7 @@ class Node{
             ROS_INFO_STREAM("Node heading cal: " << nodeHeading);
             double headingDiff = PI/2 - abs(abs(nodeHeading - nodeParent.headingAngle) - PI/2); 
             ROS_INFO_STREAM("Node heading diff: " << headingDiff);
-            if (headingDiff < maxAngleDiff) {
+            if (headingDiff < MAX_ANGLE_DIFF) {
                 this->headingAngle = nodeHeading;
                 return false;
             }
@@ -380,7 +380,7 @@ class GlobalPlanner{
                 distToGoal = calcDistance(newNode.xPos,newNode.yPos,xGoal,yGoal);
                 
                 double headingDiffToGoal = PI/2 - abs(abs(newNode.headingAngle - goalEuler.yaw) - PI/2); 
-                if (distToGoal < goalDistThreshold && headingDiffToGoal < maxAngleDiff) {
+                if (distToGoal < goalDistThreshold && headingDiffToGoal < MAX_ANGLE_DIFF) {
                     path = createPathToGoal(Tree);
                     return path;
                 }
