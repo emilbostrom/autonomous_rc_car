@@ -299,8 +299,8 @@ class GlobalPlanner{
                 quat.setRPY(0,0,node.headingAngle);
                 quat=quat.normalize();
 
-                ROS_INFO_STREAM("Quaternion: x: " << quat.x << " y: " << quat.y << " z: " 
-                                 << quat.z << " w: " << quat.w);
+                ROS_INFO_STREAM("Quaternion: x: " << quat.getX() << " y: " << quat.getX() << " z: " 
+                                 << quat.getX() << " w: " << quat.getX());
 
                 pose.orientation.x = quat.x;
                 pose.orientation.y = quat.y;
