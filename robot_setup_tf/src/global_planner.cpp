@@ -213,7 +213,6 @@ class GlobalPlanner{
             ROS_INFO_STREAM("Map width [cells]: " << mapWidth);
             ROS_INFO_STREAM("Map height [cells]: " << mapHeight);
             ROS_INFO_STREAM("Map data size: " << mapData.size());
-            ROS_INFO_STREAM("Map data first value: " << mapData[0]);
             
             uint32_t seed_val = 100;
             rng.seed(seed_val);
@@ -254,7 +253,7 @@ class GlobalPlanner{
 
             double xDelta = node.xPos - nodeParent.xPos;
             double yDelta = node.yPos - nodeParent.yPos;
-            double nodeHeading = atan2((-1*xDelta), yDelta);
+            double nodeHeading = atan2((yDelta), xDelta);
             ROS_INFO_STREAM("Node heading cal: " << nodeHeading);
             double headingDiff = PI/2 - abs(abs(nodeHeading - nodeParent.headingAngle) - PI/2); 
             ROS_INFO_STREAM("Node heading diff: " << headingDiff);
