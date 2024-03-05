@@ -12,6 +12,8 @@
 #include <algorithm> 
 #include <stdlib.h>
 
+#define PI 3.14159265
+
 
 std::vector<geometry_msgs::PoseStamped::ConstPtr> pose;
 
@@ -252,9 +254,8 @@ class GlobalPlanner{
 
             double xDelta = node.xPos - nodeParent.xPos;
             double yDelta = node.yPos - nodeParent.yPos;
-            double nodeHeading = atan(yDelta/xDelta);
-            double coordDiff = 3.14159; // CURRENTLY SOME ISSUE WITH CORRD BE WARE
-            double headingDiff = abs(nodeHeading - nodeParent.headingAngle + coordDiff);
+            double nodeHeading = atan2((-1*xDelta), yDelta);
+            double headingDiff = abs(nodeHeading - nodeParent.headingAngle);
             ROS_INFO_STREAM("Node heading diff: " << headingDiff);
             if (headingDiff < maxAngleDiff) {
                 node.headingAngle = nodeHeading;
@@ -372,8 +373,7 @@ class GlobalPlanner{
                 
                 distToGoal = calcDistance(newNode.xPos,newNode.yPos,xGoal,yGoal);
                 
-                double coordDiff = 3.14159; // COORD PROBLEM CURRENTLY BE WARE CHECK FUTURE!!!!
-                double headingDiffToGoal = abs(newNode.headingAngle - goalEuler.yaw + coordDiff);
+                double headingDiffToGoal = abs(newNode.headingAngle - goalEuler.yaw);
                 if (distToGoal < goalDistThreshold && headingDiffToGoal < maxAngleDiff) {
                     path = createPathToGoal(Tree);
                     return path;
