@@ -156,7 +156,7 @@ class GlobalPlanner{
         double y_quat_goal;
         double z_quat_goal;
         double w_quat_goal;
-        EulerAngles headingGoal;
+        EulerAngles goalEuler;
 
         typedef std::mt19937 MyRNG;
         MyRNG rng;
@@ -189,7 +189,7 @@ class GlobalPlanner{
             w_quat_goal = goalMsg->pose.orientation.w;
 
             Quaternion quatGoal = {x_quat_goal, y_quat_goal, z_quat_goal, w_quat_goal};
-            headingGoal = ToEulerAngles(quatGoal);
+            goalEuler = ToEulerAngles(quatGoal);
 
             mapResolution = mapMsg->info.resolution;
             mapWidth = mapMsg->info.width;
@@ -371,7 +371,7 @@ class GlobalPlanner{
                 
                 distToGoal = calcDistance(newNode.xPos,newNode.yPos,xGoal,yGoal);
                 
-                double headingDiffToGoal = abs(newNode.headingAngle - headingGoal);
+                double headingDiffToGoal = abs(newNode.headingAngle - goalEuler.yaw);
                 if (distToGoal < goalDistThreshold && headingDiffToGoal < maxAngleDiff) {
                     path = createPathToGoal(Tree);
                     return path;
