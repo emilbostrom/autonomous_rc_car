@@ -141,7 +141,7 @@ class GlobalPlanner{
         double goalDistThreshold; // [m]
         double obstacleDistThreshold; // [m]
         
-        double maxAngleDiff = 0.5; // [rad] TUNING PARAMETER!!!
+        double maxAngleDiff = PI/2; // [rad] TUNING PARAMETER!!!
 
         double xCurrent;
         double yCurrent;
