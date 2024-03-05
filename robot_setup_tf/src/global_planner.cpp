@@ -14,7 +14,7 @@
 #include <tf2/LinearMath/Quaternion.h>
 
 #define PI 3.14159265
-#define MAX_ANGLE_DIFF = PI/4; // TUNING PARAM
+#define MAX_ANGLE_DIFF PI/4; // TUNING PARAM
 
 
 std::vector<geometry_msgs::PoseStamped::ConstPtr> pose;
