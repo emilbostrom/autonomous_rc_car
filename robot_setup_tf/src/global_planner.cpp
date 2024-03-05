@@ -15,12 +15,63 @@
 
 std::vector<geometry_msgs::PoseStamped::ConstPtr> pose;
 
+struct Quaternion {
+    double w, x, y, z;
+};
+
+struct EulerAngles {
+    double roll, pitch, yaw;
+};
+
+Quaternion ToQuaternion(double roll, double pitch, double yaw) 
+{ // roll (x), pitch (y), yaw (z), angles are in radians
+    
+    // Abbreviations for the various angular functions
+    double cr = cos(roll * 0.5);
+    double sr = sin(roll * 0.5);
+    double cp = cos(pitch * 0.5);
+    double sp = sin(pitch * 0.5);
+    double cy = cos(yaw * 0.5);
+    double sy = sin(yaw * 0.5);
+
+    Quaternion q;
+    q.w = cr * cp * cy + sr * sp * sy;
+    q.x = sr * cp * cy - cr * sp * sy;
+    q.y = cr * sp * cy + sr * cp * sy;
+    q.z = cr * cp * sy - sr * sp * cy;
+
+    return q;
+}
+
+EulerAngles ToEulerAngles(Quaternion q) {
+    EulerAngles angles;
+
+    // roll (x-axis rotation)
+    double sinr_cosp = 2 * (q.w * q.x + q.y * q.z);
+    double cosr_cosp = 1 - 2 * (q.x * q.x + q.y * q.y);
+    angles.roll = std::atan2(sinr_cosp, cosr_cosp);
+
+    // pitch (y-axis rotation)
+    double sinp = std::sqrt(1 + 2 * (q.w * q.y - q.x * q.z));
+    double cosp = std::sqrt(1 - 2 * (q.w * q.y - q.x * q.z));
+    angles.pitch = 2 * std::atan2(sinp, cosp) - M_PI / 2;
+
+    // yaw (z-axis rotation)
+    double siny_cosp = 2 * (q.w * q.z + q.x * q.y);
+    double cosy_cosp = 1 - 2 * (q.y * q.y + q.z * q.z);
+    angles.yaw = std::atan2(siny_cosp, cosy_cosp);
+
+    return angles;
+}
+
 class Node{
     public:
         int id;
         int idParent;
         int cost;
         double stepLength;
+
+        double headingAngle;
 
         double xPos;
         double yPos;
@@ -44,7 +95,7 @@ class Node{
             return std::max(sqrt(pow((x2-x1),2) + pow((y2-y1),2)),0.001);
         }
 
-        void FindNearestNode(std::vector<Node> Tree) {
+        Node FindNearestNode(std::vector<Node> Tree) {
             Node nearestNode = Tree[0];
 
             ROS_INFO_STREAM("Node " << id << " has position " << xPos << "," << yPos);
@@ -69,6 +120,8 @@ class Node{
             this->idParent = nearestNode.id;
 
             calcNewNodePos(nearestNode,nearestDist);
+
+            return nearestNode;
         }
 
 };
@@ -85,7 +138,8 @@ class GlobalPlanner{
         double stepLength; // [m]
         double goalDistThreshold; // [m]
         double obstacleDistThreshold; // [m]
-
+        
+        double maxAngleDiff = 0.2 // [rad] TUNING PARAMETER!!!
 
         double xCurrent;
         double yCurrent;
@@ -190,6 +244,20 @@ class GlobalPlanner{
             }
         }
 
+        bool checkDynamicConstraints(Node node, Node nodeParent){
+
+            double xDelta = node.xPos - nodeParent.xPos;
+            double yDelta = node.yPos - nodeParent.yPos;
+            double nodeHeading = atan(xDelta/yDelta);
+            ROS_INFO_STREAM("Node heading calc: " << nodeHeading);
+            if (nodeHeading < maxAngleDiff) {
+                node.headingAngle = nodeHeading;
+                return false;
+            }
+            
+            return true;
+        }
+
         nav_msgs::Path createPathToGoal(std::vector<Node> Tree) {
             
             ROS_INFO_STREAM("Goal node reached, creating path msg");
@@ -217,10 +285,13 @@ class GlobalPlanner{
                 pose.position.y = node.yPos;
                 pose.position.z = 0;
 
-                pose.orientation.x = 0.924;
-                pose.orientation.y = 0;
-                pose.orientation.z = 0;
-                pose.orientation.w = 0.383;
+                Quaternion quat = ToQuaternion(0, 0, node.headingAngle);
+                ROS_INFO_STREAM("Quaternion: " << quat);
+
+                pose.orientation.x = quat.x;
+                pose.orientation.y = quat.y;
+                pose.orientation.z = quat.z;
+                pose.orientation.w = quat.w;
 
                 poseStampedMsg.pose = pose;
 
@@ -248,6 +319,9 @@ class GlobalPlanner{
             Node nodeOrigin(xCurrent,yCurrent,idOrigin,stepLength);
             nodeOrigin.idParent = 0;
             nodeOrigin.cost = 0;
+            Quaternion quat = {xQuat, yQuat, zQuat, wQuat};
+            EulerAngles angle = ToEulerAngles(quat)
+            nodeOrigin.headingAngle = angle.yaw;
 
             // Create an array of all nodes
             std::vector<Node> Tree;
@@ -261,7 +335,6 @@ class GlobalPlanner{
 
                 auto [xPosNode, yPosNode] = CellToCoordinate(xCell,yCell);
 
-                // 
                 if(nodeIsGoalBias(rng) < goalBias){
                     ROS_INFO_STREAM("Node is set to goal");
                     xPosNode = xGoal;
@@ -269,7 +342,13 @@ class GlobalPlanner{
                 }
 
                 Node newNode(xPosNode,yPosNode,iRrt,stepLength);
-                newNode.FindNearestNode(Tree);
+                Node parentNode = newNode.FindNearestNode(Tree);
+
+                bool dynamicConstraint = checkDynamicConstraints(newNode,parentNode);
+                if (dynamicConstraint) {
+                    ROS_INFO_STREAM("Node does not meet dynamic constraints, skipped");
+                    continue;
+                }
 
                 bool nodeInObstacle = checkForObstacle(newNode);
                 if (nodeInObstacle) {
