@@ -255,6 +255,7 @@ class GlobalPlanner{
             double xDelta = node.xPos - nodeParent.xPos;
             double yDelta = node.yPos - nodeParent.yPos;
             double nodeHeading = atan2((-1*xDelta), yDelta);
+            ROS_INFO_STREAM("Node heading cal: " << nodeHeading);
             double headingDiff = abs(nodeHeading - nodeParent.headingAngle);
             ROS_INFO_STREAM("Node heading diff: " << headingDiff);
             if (headingDiff < maxAngleDiff) {
