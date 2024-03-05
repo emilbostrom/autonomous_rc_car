@@ -156,6 +156,7 @@ class GlobalPlanner{
         double y_quat_goal;
         double z_quat_goal;
         double w_quat_goal;
+        EulerAngles headingGoal;
 
         typedef std::mt19937 MyRNG;
         MyRNG rng;
@@ -188,7 +189,7 @@ class GlobalPlanner{
             w_quat_goal = goalMsg->pose.orientation.w;
 
             Quaternion quatGoal = {x_quat_goal, y_quat_goal, z_quat_goal, w_quat_goal};
-            EulerAngles headingGoal = ToEulerAngles(quatGoal);
+            headingGoal = ToEulerAngles(quatGoal);
 
             mapResolution = mapMsg->info.resolution;
             mapWidth = mapMsg->info.width;
