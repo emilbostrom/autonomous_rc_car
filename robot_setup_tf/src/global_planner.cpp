@@ -187,6 +187,9 @@ class GlobalPlanner{
             z_quat_goal = goalMsg->pose.orientation.z;
             w_quat_goal = goalMsg->pose.orientation.w;
 
+            Quaternion quatGoal = {x_quat_goal, y_quat_goal, z_quat_goal, w_quat_goal};
+            EulerAngles headingGoal = ToEulerAngles(quatGoal);
+
             mapResolution = mapMsg->info.resolution;
             mapWidth = mapMsg->info.width;
             mapHeight = mapMsg->info.height;
@@ -366,7 +369,9 @@ class GlobalPlanner{
                                  << newNode.xPos << " yPos: " << newNode.yPos);
                 
                 distToGoal = calcDistance(newNode.xPos,newNode.yPos,xGoal,yGoal);
-                if (distToGoal < goalDistThreshold) {
+                
+                double headingDiffToGoal = abs(newNode.headingAngle - headingGoal);
+                if (distToGoal < goalDistThreshold && headingDiffToGoal < maxAngleDiff) {
                     path = createPathToGoal(Tree);
                     return path;
                 }
