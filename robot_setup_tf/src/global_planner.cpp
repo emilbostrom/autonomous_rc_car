@@ -16,7 +16,7 @@
 #define PI 3.14159265
 
 
-double maxAngleDiff PI/4; // TUNING PARAM
+double maxAngleDiff = PI/4; // TUNING PARAM
 
 std::vector<geometry_msgs::PoseStamped::ConstPtr> pose;
 
