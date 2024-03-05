@@ -139,7 +139,7 @@ class GlobalPlanner{
         double goalDistThreshold; // [m]
         double obstacleDistThreshold; // [m]
         
-        double maxAngleDiff = 0.2; // [rad] TUNING PARAMETER!!!
+        double maxAngleDiff = 0.5; // [rad] TUNING PARAMETER!!!
 
         double xCurrent;
         double yCurrent;
@@ -249,8 +249,9 @@ class GlobalPlanner{
             double xDelta = node.xPos - nodeParent.xPos;
             double yDelta = node.yPos - nodeParent.yPos;
             double nodeHeading = atan(xDelta/yDelta);
-            ROS_INFO_STREAM("Node heading calc: " << nodeHeading);
-            if (nodeHeading < maxAngleDiff) {
+            double headingDiff = abs(nodeHeading - nodeParent.headingAngle);
+            ROS_INFO_STREAM("Node heading diff: " << headingDiff);
+            if (headingDiff < maxAngleDiff) {
                 node.headingAngle = nodeHeading;
                 return false;
             }
