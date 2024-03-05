@@ -321,7 +321,7 @@ class GlobalPlanner{
             nodeOrigin.idParent = 0;
             nodeOrigin.cost = 0;
             Quaternion quat = {xQuat, yQuat, zQuat, wQuat};
-            EulerAngles angle = ToEulerAngles(quat)
+            EulerAngles angle = ToEulerAngles(quat);
             nodeOrigin.headingAngle = angle.yaw;
 
             // Create an array of all nodes
