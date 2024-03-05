@@ -325,6 +325,8 @@ class GlobalPlanner{
             EulerAngles angle = ToEulerAngles(quat);
             nodeOrigin.headingAngle = angle.yaw;
 
+            ROS_INFO_STREAM("First node heading: " << nodeOrigin.headingAngle);
+
             // Create an array of all nodes
             std::vector<Node> Tree;
             Tree.push_back(nodeOrigin);
