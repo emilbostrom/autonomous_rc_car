@@ -297,7 +297,7 @@ class GlobalPlanner{
 
                 tf2::Quaternion quat;
                 quat.setRPY(0,0,node.headingAngle);
-                quat=myQuaternion.normalize();
+                quat=quat.normalize();
 
                 ROS_INFO_STREAM("Quaternion: x: " << quat.x << " y: " << quat.y << " z: " 
                                  << quat.z << " w: " << quat.w);
