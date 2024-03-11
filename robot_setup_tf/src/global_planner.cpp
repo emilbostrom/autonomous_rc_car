@@ -13,12 +13,13 @@
 #include <stdlib.h>
 #include <tf2/LinearMath/Quaternion.h>
 
-#define PI 3.14159265
-
-
-double maxAngleDiff = PI/4; // TUNING PARAM
-
-std::vector<geometry_msgs::PoseStamped::ConstPtr> pose;
+// TUNING PARAMETERS
+const double maxAngleDiff = M_PI/8; 
+const int goalBias = 10; // How often should the new node be set in goal
+const int maxIterationsRrt = 2000;
+const double stepLength = 0.1; // [m]
+const double goalDistThreshold = stepLength*2; // [m]
+const double obstacleDistThreshold = stepLength*2; // [m]
 
 struct Quaternion {
     double w, x, y, z;
@@ -27,26 +28,6 @@ struct Quaternion {
 struct EulerAngles {
     double roll, pitch, yaw;
 };
-
-Quaternion ToQuaternion(double roll, double pitch, double yaw) 
-{ // roll (x), pitch (y), yaw (z), angles are in radians
-    
-    // Abbreviations for the various angular functions
-    double cr = cos(roll * 0.5);
-    double sr = sin(roll * 0.5);
-    double cp = cos(pitch * 0.5);
-    double sp = sin(pitch * 0.5);
-    double cy = cos(yaw * 0.5);
-    double sy = sin(yaw * 0.5);
-
-    Quaternion q;
-    q.w = cr * cp * cy + sr * sp * sy;
-    q.x = sr * cp * cy - cr * sp * sy;
-    q.y = cr * sp * cy + sr * cp * sy;
-    q.z = cr * cp * sy - sr * sp * cy;
-
-    return q;
-}
 
 EulerAngles ToEulerAngles(Quaternion q) {
     EulerAngles angles;
@@ -67,6 +48,14 @@ EulerAngles ToEulerAngles(Quaternion q) {
     angles.yaw = std::atan2(siny_cosp, cosy_cosp);
 
     return angles;
+}
+
+double calcDistance(double x1, double y1, double x2, double y2) {
+    return sqrt(pow((x2-x1),2) + pow((y2-y1),2));
+}
+
+double calcHeadingDiff(double heading1, heading2) {
+    return M_PI/2 - abs(abs(heading1 - heading2) - M_PI/2);
 }
 
 class Node{
@@ -101,8 +90,8 @@ class Node{
             double xDelta = this->xPos - nodeParent.xPos;
             double yDelta = this->yPos - nodeParent.yPos;
             double nodeHeading = atan2((yDelta), xDelta);
-            ROS_INFO_STREAM("Node heading cal: " << nodeHeading);
-            double headingDiff = PI/2 - abs(abs(nodeHeading - nodeParent.headingAngle) - PI/2); 
+            ROS_INFO_STREAM("Node heading calc: " << nodeHeading);
+            double headingDiff = calcHeadingDiff(nodeHeading,nodeParent.headingAngle);
             ROS_INFO_STREAM("Node heading diff: " << headingDiff);
             if (headingDiff < maxAngleDiff) {
                 this->headingAngle = nodeHeading;
@@ -110,10 +99,6 @@ class Node{
             }
             
             return true;
-        }
-
-        double calcDistance(double x1, double y1, double x2, double y2) {
-            return std::max(sqrt(pow((x2-x1),2) + pow((y2-y1),2)),0.001);
         }
 
         Node FindNearestNode(std::vector<Node> Tree) {
@@ -130,8 +115,6 @@ class Node{
                 if (dist < nearestDist) {
                     nearestNode = Tree[i];
                     nearestDist = dist;
-                    //ROS_INFO_STREAM("New nearest node id: " << nearestNode.id);
-                    //ROS_INFO_STREAM("The distance to above is: " << nearestDist);
                 }
             }
 
@@ -154,19 +137,17 @@ class GlobalPlanner{
         double mapResolution; // [m/cell]
         int mapWidth; // [cells]
         int mapHeight; // [cells]
-        //std::vector<int8_t> mapDataFetch; // [0-100] occupancy
         std::vector<int> mapData;
-        double stepLength; // [m]
-        double goalDistThreshold; // [m]
-        double obstacleDistThreshold; // [m]
+
+        std::vector<geometry_msgs::PoseStamped::ConstPtr> pose;
 
         double xCurrent;
         double yCurrent;
         double zCurrent;
-        double xQuat;
-        double yQuat;
-        double zQuat;
-        double wQuat;
+        double xQuatCurrent;
+        double yQuatCurrent;
+        double zQuatCurrent;
+        double wQuatCurrent;
 
         double xGoal;
         double yGoal;
@@ -183,9 +164,6 @@ class GlobalPlanner{
         std::uniform_int_distribution<uint32_t> widthGenerator;
         std::uniform_int_distribution<uint32_t> heightGenerator;
 
-        std::uniform_int_distribution<uint32_t> nodeIsGoalBias = std::uniform_int_distribution<uint32_t>(0, 99);
-        int goalBias = 10; // Tuning parameter
-
         GlobalPlanner(const geometry_msgs::PoseStamped::ConstPtr& poseMsg, 
                       const nav_msgs::OccupancyGrid::ConstPtr& mapMsg,
                       const geometry_msgs::PoseStamped::ConstPtr& goalMsg) {
@@ -194,10 +172,10 @@ class GlobalPlanner{
             xCurrent = poseMsg->pose.position.x;
             yCurrent = poseMsg->pose.position.y;
             zCurrent = poseMsg->pose.position.z;
-            xQuat = poseMsg->pose.orientation.x;
-            yQuat = poseMsg->pose.orientation.y;
-            zQuat = poseMsg->pose.orientation.z;
-            wQuat = poseMsg->pose.orientation.w;
+            xQuatCurrent = poseMsg->pose.orientation.x;
+            yQuatCurrent = poseMsg->pose.orientation.y;
+            zQuatCurrent = poseMsg->pose.orientation.z;
+            wQuatCurrent = poseMsg->pose.orientation.w;
 
             xGoal = goalMsg->pose.position.x;
             yGoal = goalMsg->pose.position.y;
@@ -217,28 +195,13 @@ class GlobalPlanner{
                 mapData.push_back(static_cast<int>(value));
             }
 
-            /*for(int i = 0; i < mapData.size();i++){
-                if (mapData[i] != -1) {
-                    ROS_INFO_STREAM("index: "<< i);
-                    ROS_INFO_STREAM("value: "<< mapData[i]);
-                    ROS_INFO_STREAM("x: " << i % mapHeight);
-                    ROS_INFO_STREAM("y: " << i / mapHeight);
-                }
-            }*/
+            std::uniform_int_distribution<uint32_t> nodeIsGoalBias = std::uniform_int_distribution<uint32_t>(0, 99);
 
-            ROS_INFO_STREAM("Map resolution [m]: " << mapResolution);
-            ROS_INFO_STREAM("Map width [cells]: " << mapWidth);
-            ROS_INFO_STREAM("Map height [cells]: " << mapHeight);
-            ROS_INFO_STREAM("Map data size: " << mapData.size());
-            
+            // Random generator
             uint32_t seed_val = 100;
             rng.seed(seed_val);
             widthGenerator = std::uniform_int_distribution<uint32_t>(0, mapWidth);
             heightGenerator = std::uniform_int_distribution<uint32_t>(0, mapHeight);
-
-            stepLength = mapResolution*2;
-            goalDistThreshold = stepLength*2;
-            obstacleDistThreshold = stepLength*2;
         }
 
         std::tuple<double, double> CellToCoordinate(int xCell, int yCell) {
@@ -247,18 +210,12 @@ class GlobalPlanner{
             return {xPos, yPos};
         }
 
-        double calcDistance(double x1, double y1, double x2, double y2) {
-            return sqrt(pow((x2-x1),2) + pow((y2-y1),2));
-        }
-
         bool checkForObstacle(Node node) {
             int xMapCell = node.xPos / mapResolution + mapWidth/2;
             int yMapCell = node.yPos / mapResolution + mapHeight/2;
 
             int mapDataIndex = yMapCell*mapHeight + xMapCell;
             
-            //ROS_INFO_STREAM("Map data index: " << mapDataIndex);
-            //ROS_INFO_STREAM("Node position " << node.xPos << "," << node.yPos <<  " is in mapdata: " << this->mapData[mapDataIndex]);
             if (this->mapData[mapDataIndex] != 0){
                 return true;
             } else {
@@ -293,8 +250,6 @@ class GlobalPlanner{
                 pose.position.y = node.yPos;
                 pose.position.z = 0;
 
-                // Quaternion quat = ToQuaternion(0, 0, node.headingAngle);
-
                 tf2::Quaternion quat;
                 quat.setRPY(0,0,node.headingAngle);
                 quat=quat.normalize();
@@ -323,18 +278,14 @@ class GlobalPlanner{
 
         const nav_msgs::Path createPath(ros::Publisher pub){
 
-            double xPathPos = xCurrent;
-            double yPathPos = yCurrent;
             nav_msgs::Path path;
-
-            double distToGoal = calcDistance(xPathPos,yPathPos,xGoal,yGoal);
 
             // Create first node, which is current position
             int idOrigin = 0;
             Node nodeOrigin(xCurrent,yCurrent,idOrigin,stepLength);
             nodeOrigin.idParent = 0;
             nodeOrigin.cost = 0;
-            Quaternion quat = {xQuat, yQuat, zQuat, wQuat};
+            Quaternion quat = {xQuatCurrent, yQuatCurrent, zQuatCurrent, wQuatCurrent};
             EulerAngles angle = ToEulerAngles(quat);
             nodeOrigin.headingAngle = angle.yaw;
 
@@ -344,7 +295,6 @@ class GlobalPlanner{
             std::vector<Node> Tree;
             Tree.push_back(nodeOrigin);
 
-            int maxIterationsRrt = 2000;
             for(int iRrt  = 1; iRrt < maxIterationsRrt; iRrt++) {
                 
                 int xCell = widthGenerator(rng);
@@ -352,6 +302,7 @@ class GlobalPlanner{
 
                 auto [xPosNode, yPosNode] = CellToCoordinate(xCell,yCell);
 
+                // Randomly set the new node in the goal position 
                 if(nodeIsGoalBias(rng) < goalBias){
                     ROS_INFO_STREAM("Node is set to goal");
                     xPosNode = xGoal;
@@ -373,6 +324,7 @@ class GlobalPlanner{
                     continue;
                 }
  
+                // If both dynamic and obstacle checks pass add node to tree
                 Tree.push_back(newNode);
 
                 ROS_INFO_STREAM("Added new node to tree: " << newNode.id << " xPos: " 
@@ -380,7 +332,7 @@ class GlobalPlanner{
                 
                 distToGoal = calcDistance(newNode.xPos,newNode.yPos,xGoal,yGoal);
                 
-                double headingDiffToGoal = PI/2 - abs(abs(newNode.headingAngle - goalEuler.yaw) - PI/2); 
+                double headingDiffToGoal = calcHeadingDiff(newNode.headingAngle,goalEuler.yaw);
                 if (distToGoal < goalDistThreshold && headingDiffToGoal < maxAngleDiff) {
                     path = createPathToGoal(Tree);
                     return path;
