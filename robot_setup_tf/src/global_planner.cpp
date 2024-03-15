@@ -56,7 +56,7 @@ double calcDistance(double x1, double y1, double x2, double y2) {
     return sqrt(pow((x2-x1),2) + pow((y2-y1),2));
 }
 
-double calcHeadingDiff(double heading1, heading2) {
+double calcHeadingDiff(double heading1, double heading2) {
     return M_PI/2 - abs(abs(heading1 - heading2) - M_PI/2);
 }
 
@@ -79,21 +79,21 @@ class Node{
 
         void calcNewNodePos(const Node& nearestNode, double distance) {
             ROS_INFO_STREAM("Distance to node for connection: " << distance);
-            double dx = static_cast<double>(xPos - nearestNode->xPos) / distance;
-            double dy = static_cast<double>(yPos - nearestNode->yPos) / distance;
-            xPos = nearestNode->xPos + dx * stepLength;
-            yPos = nearestNode->yPos + dy * stepLength;
+            double dx = static_cast<double>(xPos - nearestNode.xPos) / distance;
+            double dy = static_cast<double>(yPos - nearestNode.yPos) / distance;
+            xPos = nearestNode.xPos + dx * stepLength;
+            yPos = nearestNode.yPos + dy * stepLength;
             ROS_INFO_STREAM("new xPos: " << xPos);
             ROS_INFO_STREAM("new yPos: " << yPos);
         }
 
         bool checkDynamicConstraints(const Node& nodeParent){
 
-            double xDelta = xPos - nodeParent->xPos;
-            double yDelta = yPos - nodeParent->yPos;
+            double xDelta = xPos - nodeParent.xPos;
+            double yDelta = yPos - nodeParent.yPos;
             double nodeHeading = atan2((yDelta), xDelta);
             ROS_INFO_STREAM("Node heading calc: " << nodeHeading);
-            double headingDiff = calcHeadingDiff(nodeHeading,nodeParent->headingAngle);
+            double headingDiff = calcHeadingDiff(nodeHeading,nodeParent.headingAngle);
             ROS_INFO_STREAM("Node heading diff: " << headingDiff);
             if (headingDiff < maxAngleDiff) {
                 headingAngle = nodeHeading;
@@ -108,12 +108,12 @@ class Node{
 
             ROS_INFO_STREAM("Node " << id << " has position " << xPos << "," << yPos);
 
-            double nearestDist = calcDistance(xPos,yPos,Tree[0].xPos,Tree[0]->yPos);
+            double nearestDist = calcDistance(xPos,yPos,Tree[0].xPos,Tree[0].yPos);
 
             ROS_INFO_STREAM("Tree size: " << Tree.size());
 
             for(int i = 1; i < Tree.size(); i++) {
-                double dist = calcDistance(xPos,yPos,Tree[i].xPos,Tree[i]->yPos);
+                double dist = calcDistance(xPos,yPos,Tree[i].xPos,Tree[i].yPos);
                 if (dist < nearestDist) {
                     nearestNode = Tree[i];
                     nearestDist = dist;
@@ -162,6 +162,12 @@ class GlobalPlanner{
         double w_quat_goal;
         EulerAngles goalEuler;
 
+        // Random generator
+        typedef std::mt19937 MyRNG;
+        MyRNG rng;
+        uint32_t seed_val = 100;
+        rng.seed(seed_val);
+
         GlobalPlanner(const geometry_msgs::PoseStamped::ConstPtr& poseMsg, 
                       const nav_msgs::OccupancyGrid::ConstPtr& mapMsg,
                       const geometry_msgs::PoseStamped::ConstPtr& goalMsg) {
@@ -195,14 +201,10 @@ class GlobalPlanner{
         }
 
         std::tuple<double, double> RandomPos() const {
-            typedef std::mt19937 MyRNG;
-            MyRNG rng;
-
-            // Random generator
-            uint32_t seed_val = 100;
-            rng.seed(seed_val);
-            std::uniform_int_distribution<uint32_t> widthGenerator = std::uniform_int_distribution<uint32_t>(0, frameIdMap);
-            std::uniform_int_distribution<uint32_t> heightGenerator = std::uniform_int_distribution<uint32_t>(0, mapHeight);
+            std::uniform_int_distribution<uint32_t> widthGenerator;
+            std::uniform_int_distribution<uint32_t> heightGenerator;
+            widthGenerator = std::uniform_int_distribution<uint32_t>(0, frameIdMap);
+            heightGenerator = std::uniform_int_distribution<uint32_t>(0, mapHeight);
 
             int xCell = widthGenerator(rng);
             int yCell = heightGenerator(rng);
@@ -213,8 +215,8 @@ class GlobalPlanner{
         }
 
         bool checkForObstacle(const Node& node) {
-            int xMapCell = node->xPos / mapResolution + mapWidth/2;
-            int yMapCell = node->yPos / mapResolution + mapHeight/2;
+            int xMapCell = node.xPos / mapResolution + mapWidth/2;
+            int yMapCell = node.yPos / mapResolution + mapHeight/2;
 
             int mapDataIndex = yMapCell*mapHeight + xMapCell;
             
@@ -299,7 +301,7 @@ class GlobalPlanner{
 
             std::uniform_int_distribution<uint32_t> nodeIsGoalBias = std::uniform_int_distribution<uint32_t>(0, 99);
 
-            double xPosNode, yPosNode;
+            double xPosNode, yPosNode, distToGoal;
             for(int iRrt  = 1; iRrt < maxIterationsRrt; iRrt++) {
                 
                 
