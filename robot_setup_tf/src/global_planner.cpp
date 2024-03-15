@@ -197,8 +197,6 @@ class GlobalPlanner{
             for (const auto& value : mapMsg->data) {
                 mapData.push_back(static_cast<int>(value));
             }
-
-            rng.seed(seed_val);
         }
 
         std::tuple<double, double> RandomPos() const {
@@ -206,6 +204,7 @@ class GlobalPlanner{
             std::uniform_int_distribution<uint32_t> heightGenerator;
             widthGenerator = std::uniform_int_distribution<uint32_t>(0, mapWidth);
             heightGenerator = std::uniform_int_distribution<uint32_t>(0, mapHeight);
+            rng.seed(seed_val);
 
             int xCell = widthGenerator(rng);
             int yCell = heightGenerator(rng);
@@ -303,6 +302,7 @@ class GlobalPlanner{
             std::uniform_int_distribution<uint32_t> nodeIsGoalBias = std::uniform_int_distribution<uint32_t>(0, 99);
 
             double xPosNode, yPosNode, distToGoal;
+            rng.seed(seed_val);
             for(int iRrt  = 1; iRrt < maxIterationsRrt; iRrt++) {
                 // Randomly set the new node in the goal position 
                 if(nodeIsGoalBias(rng) < goalBias){
