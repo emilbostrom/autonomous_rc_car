@@ -16,7 +16,7 @@
 #include <tf2/LinearMath/Quaternion.h>
 
 // TUNING PARAMETERS
-const double maxAngleDiff = M_PI/8; 
+const double maxAngleDiff = 0.5;// M_PI/8; 
 const int goalBias = 10; // How often should the new node be set in goal
 const int maxIterationsRrt = 2000;
 const double stepLength = 0.1; // [m]
