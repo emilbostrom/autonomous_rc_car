@@ -91,17 +91,18 @@ class Node{
 
             double xDelta = xPos - nodeParent.xPos;
             double yDelta = yPos - nodeParent.yPos;
-            double nodeHeading = atan(yDelta/xDelta);
-            if (xDelta < 0 && yDelta > 0) {
-                nodeHeading += M_PI;
-            } else if (xDelta < 0 && yDelta < 0) {
-                nodeHeading -= M_PI;
-            }
+            double nodeHeading = atan2(yDelta,xDelta);
             
             ROS_INFO_STREAM("Node heading calc: " << nodeHeading);
             //double headingDiff = calcHeadingDiff(nodeHeading,nodeParent.headingAngle);
-            double headingDiff = abs(nodeHeading - nodeParent.headingAngle);
+            double headingDiff = nodeHeading - nodeParent.headingAngle;
             ROS_INFO_STREAM("Node heading diff: " << headingDiff);
+            if (headingDiff > M_PI) {
+                headingDiff -= 2.0 * M_PI;
+            } else if (headingDiff <= -M_PI) {
+                headingDiff += 2.0 * M_PI;
+            }
+        
             if (abs(headingDiff) < maxAngleDiff) {
                 headingAngle = nodeHeading;
                 return false;
