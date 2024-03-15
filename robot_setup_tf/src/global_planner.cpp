@@ -65,15 +65,14 @@ class Node{
         int id;
         int idParent;
         int cost;
-        double stepLength;
 
         double headingAngle;
 
         double xPos;
         double yPos;
         
-        Node(double xPos, double yPos, int id, double stepLength) : 
-             xPos(xPos), yPos(yPos), id(id), stepLength(stepLength){
+        Node(double xPos, double yPos, int id) : 
+             xPos(xPos), yPos(yPos), id(id){
             ROS_INFO_STREAM("Node id: " << id);
         }
 
@@ -83,6 +82,7 @@ class Node{
             double dy = static_cast<double>(yPos - nearestNode.yPos) / distance;
             xPos = nearestNode.xPos + std::min(dx, dx * stepLength);
             yPos = nearestNode.yPos + std::min(dy, dy * stepLength);
+            ROS_INFO_STREAM("stepLength: " << stepLength);
             ROS_INFO_STREAM("dx: " << dx);
             ROS_INFO_STREAM("dy: " << dy);
             ROS_INFO_STREAM("new xPos: " << xPos);
@@ -298,7 +298,7 @@ class GlobalPlanner{
 
             // Create first node, which is current position
             int idOrigin = 0;
-            Node nodeOrigin(xCurrent,yCurrent,idOrigin,stepLength);
+            Node nodeOrigin(xCurrent,yCurrent,idOrigin);
             nodeOrigin.idParent = 0;
             nodeOrigin.cost = 0;
             Quaternion quat = {xQuatCurrent, yQuatCurrent, zQuatCurrent, wQuatCurrent};
@@ -324,7 +324,7 @@ class GlobalPlanner{
                     std::tie(xPosNode, yPosNode) = RandomPos();
                 }
 
-                Node newNode(xPosNode,yPosNode,iRrt,stepLength);
+                Node newNode(xPosNode,yPosNode,iRrt);
                 Node parentNode = newNode.FindNearestNode(Tree);
 
                 bool dynamicConstraint = newNode.checkDynamicConstraints(parentNode);
