@@ -84,7 +84,7 @@ class Node{
             xPos = nearestNode.xPos + std::min(dx, dx * stepLength);
             yPos = nearestNode.yPos + std::min(dy, dy * stepLength);
             ROS_INFO_STREAM("dx: " << dx);
-            ROS_INFO_STREAM("dy: " << dy)
+            ROS_INFO_STREAM("dy: " << dy);
             ROS_INFO_STREAM("new xPos: " << xPos);
             ROS_INFO_STREAM("new yPos: " << yPos);
         }
