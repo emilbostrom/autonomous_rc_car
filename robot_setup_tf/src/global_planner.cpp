@@ -92,8 +92,10 @@ class Node{
             double xDelta = xPos - nodeParent.xPos;
             double yDelta = yPos - nodeParent.yPos;
             double nodeHeading = atan(yDelta/xDelta);
-            if (xDelta < 0) {
+            if (xDelta < 0 && yDelta > 0) {
                 nodeHeading += M_PI;
+            } else if (xDelta < 0 && yDelta < 0) {
+                nodeHeading -= M_PI;
             }
             
             ROS_INFO_STREAM("Node heading calc: " << nodeHeading);
