@@ -163,9 +163,9 @@ class GlobalPlanner{
         EulerAngles goalEuler;
 
         // Random generator
-        typedef std::mt19937 MyRNG;
-        MyRNG rng;
+        std::mt19937 rng;
         uint32_t seed_val = 100;
+        rng.seed(seed_val);
 
         GlobalPlanner(const geometry_msgs::PoseStamped::ConstPtr& poseMsg, 
                       const nav_msgs::OccupancyGrid::ConstPtr& mapMsg,
@@ -198,15 +198,10 @@ class GlobalPlanner{
                 mapData.push_back(static_cast<int>(value));
             }
 
-            rng.seed(seed_val);
+            
         }
 
         std::tuple<double, double> RandomPos() const {
-            /*std::uniform_int_distribution<uint32_t> widthGenerator;
-            std::uniform_int_distribution<uint32_t> heightGenerator;
-            widthGenerator = std::uniform_int_distribution<uint32_t>(0, mapWidth);
-            heightGenerator = std::uniform_int_distribution<uint32_t>(0, mapHeight);*/
-
             std::uniform_int_distribution<uint32_t> widthGenerator(0, mapWidth);
             std::uniform_int_distribution<uint32_t> heightGenerator(0, mapHeight);
 
