@@ -97,7 +97,8 @@ class Node{
             }
             
             ROS_INFO_STREAM("Node heading calc: " << nodeHeading);
-            double headingDiff = calcHeadingDiff(nodeHeading,nodeParent.headingAngle);
+            //double headingDiff = calcHeadingDiff(nodeHeading,nodeParent.headingAngle);
+            double headingDiff = abs(nodeHeading - nodeParent.headingAngle)
             ROS_INFO_STREAM("Node heading diff: " << headingDiff);
             if (abs(headingDiff) < maxAngleDiff) {
                 headingAngle = nodeHeading;
