@@ -328,8 +328,8 @@ class GlobalPlanner{
                     yPosNode = yGoal;
                 } else {
                     std::tie(xPosNode, yPosNode) = RandomPos();
-                    ROS_INFO_STREAM("xPosNode received: " xPosNode);
-                    ROS_INFO_STREAM("yPosNode received: " yPosNode);
+                    ROS_INFO_STREAM("xPosNode received: " << xPosNode);
+                    ROS_INFO_STREAM("yPosNode received: " << yPosNode);
                 }
 
                 Node newNode(xPosNode,yPosNode,iRrt,stepLength);
