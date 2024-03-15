@@ -302,7 +302,7 @@ class GlobalPlanner{
 
             std::uniform_int_distribution<uint32_t> nodeIsGoalBias = std::uniform_int_distribution<uint32_t>(0, 99);
 
-            double distToGoal;
+            double xPosNode, yPosNode, distToGoal;
             for(int iRrt  = 1; iRrt < maxIterationsRrt; iRrt++) {
                 // Randomly set the new node in the goal position 
                 if(nodeIsGoalBias(rng) < goalBias){
