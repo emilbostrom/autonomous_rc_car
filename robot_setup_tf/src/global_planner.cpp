@@ -164,8 +164,7 @@ class GlobalPlanner{
 
         // Random generator
         std::mt19937 rng;
-        uint32_t seed_val = 100;
-        rng.seed(seed_val);
+        uint32_t seed_val;
 
         GlobalPlanner(const geometry_msgs::PoseStamped::ConstPtr& poseMsg, 
                       const nav_msgs::OccupancyGrid::ConstPtr& mapMsg,
@@ -198,7 +197,8 @@ class GlobalPlanner{
                 mapData.push_back(static_cast<int>(value));
             }
 
-            
+            seed_val = 100;
+            rng.seed(seed_val);
         }
 
         std::tuple<double, double> RandomPos() const {
