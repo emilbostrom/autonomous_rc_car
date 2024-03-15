@@ -89,13 +89,12 @@ class Node{
             ROS_INFO_STREAM("Distance to node for connection: " << distance);
             double dx = static_cast<double>(xPos - nearestNode.xPos) / distance;
             double dy = static_cast<double>(yPos - nearestNode.yPos) / distance;
-            if (distance < stepLength) {
-                dx = xPos - nearestNode.xPos;
-                dy = yPos - nearestNode.yPos;
-            } else {
-                dx = static_cast<double>(xPos - nearestNode.xPos) / distance;
-                dy = static_cast<double>(yPos - nearestNode.yPos) / distance;
-            }
+            dx = static_cast<double>(xPos - nearestNode.xPos) / distance;
+            dy = static_cast<double>(yPos - nearestNode.yPos) / distance;
+            if (distance > stepLength) {
+                dx = dx*stepLength;
+                dy = dy*stepLength;
+                
             xPos = nearestNode.xPos + dx;
             yPos = nearestNode.yPos + dy;
             ROS_INFO_STREAM("stepLength: " << stepLength);
