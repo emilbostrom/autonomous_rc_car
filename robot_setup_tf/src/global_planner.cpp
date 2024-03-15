@@ -97,9 +97,10 @@ class Node{
             //double headingDiff = calcHeadingDiff(nodeHeading,nodeParent.headingAngle);
             double headingDiff = nodeHeading - nodeParent.headingAngle;
             ROS_INFO_STREAM("Node heading diff: " << headingDiff);
-            if (headingDiff > M_PI) {
+            while (headingDiff > M_PI) {
                 headingDiff -= 2.0 * M_PI;
-            } else if (headingDiff <= -M_PI) {
+            } 
+            while (headingDiff <= -M_PI) {
                 headingDiff += 2.0 * M_PI;
             }
         
@@ -213,11 +214,21 @@ class GlobalPlanner{
             std::uniform_int_distribution<uint32_t> widthGenerator(0, mapWidth);
             std::uniform_int_distribution<uint32_t> heightGenerator(0, mapHeight);
 
+
             int xCell = widthGenerator(rng);
             int yCell = heightGenerator(rng);
             
             double xPos = (xCell - mapWidth/2)*mapResolution;
             double yPos = (yCell - mapHeight/2)*mapResolution;
+
+            ROS_INFO_STREAM("NEW RANDOM POS");
+            ROS_INFO_STREAM("mapWidth: " << mapWidth);
+            ROS_INFO_STREAM("mapHeight: " << mapHeight);
+            ROS_INFO_STREAM("xCell: " << xCell);
+            ROS_INFO_STREAM("yCell: " << yCell);
+            ROS_INFO_STREAM("xPos: " << xPos);
+            ROS_INFO_STREAM("yPos: " << yPos);
+
             return {xPos, yPos};
         }
 
