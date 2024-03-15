@@ -81,8 +81,8 @@ class Node{
             ROS_INFO_STREAM("Distance to node for connection: " << distance);
             double dx = static_cast<double>(xPos - nearestNode.xPos) / distance;
             double dy = static_cast<double>(yPos - nearestNode.yPos) / distance;
-            xPos = nearestNode.xPos + dx * stepLength;
-            yPos = nearestNode.yPos + dy * stepLength;
+            xPos = nearestNode.xPos + std::min(dx, dx * stepLength);
+            yPos = nearestNode.yPos + std::min(dy, dy * stepLength);
             ROS_INFO_STREAM("new xPos: " << xPos);
             ROS_INFO_STREAM("new yPos: " << yPos);
         }
@@ -327,7 +327,9 @@ class GlobalPlanner{
                     xPosNode = xGoal;
                     yPosNode = yGoal;
                 } else {
-                    auto [xPosNode, yPosNode] = RandomPos();
+                    std::tie(xPosNode, yPosNode) = RandomPos();
+                    ROS_INFO_STREAM("xPosNode received: " xPosNode);
+                    ROS_INFO_STREAM("yPosNode received: " yPosNode);
                 }
 
                 Node newNode(xPosNode,yPosNode,iRrt,stepLength);
