@@ -92,7 +92,7 @@ class Node{
             double xDelta = xPos - nodeParent.xPos;
             double yDelta = yPos - nodeParent.yPos;
             double nodeHeading = atan(yDelta/xDelta);
-            if (xDelta) < 0 {
+            if (xDelta < 0) {
                 nodeHeading += PI;
             }
             
