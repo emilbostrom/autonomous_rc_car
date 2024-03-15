@@ -58,7 +58,6 @@ double calcDistance(double x1, double y1, double x2, double y2) {
 
 double calcHeadingDiff(double heading1, double heading2) {
     double headingDiff = heading1 - heading2;
-    ROS_INFO_STREAM("Node heading diff: " << headingDiff);
     
     while (headingDiff > M_PI) {
         headingDiff -= 2.0 * M_PI;
@@ -66,6 +65,7 @@ double calcHeadingDiff(double heading1, double heading2) {
     while (headingDiff <= -M_PI) {
         headingDiff += 2.0 * M_PI;
     }
+    ROS_INFO_STREAM("Node heading diff: " << headingDiff);
     return headingDiff;
 }
 
