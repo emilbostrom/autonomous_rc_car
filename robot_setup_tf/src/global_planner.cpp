@@ -1,8 +1,5 @@
-#include <ros/ros.h>
-#include <geometry_msgs/PoseStamped.h>
-#include <nav_msgs/Path.h>
-#include <nav_msgs/MapMetaData.h>
-#include <nav_msgs/OccupancyGrid.h>
+#include <stdlib.h>
+
 #include <sstream>
 #include <vector>
 #include <string>
@@ -10,7 +7,12 @@
 #include <cmath>
 #include <random>
 #include <algorithm> 
-#include <stdlib.h>
+
+#include <ros/ros.h>
+#include <geometry_msgs/PoseStamped.h>
+#include <nav_msgs/Path.h>
+#include <nav_msgs/MapMetaData.h>
+#include <nav_msgs/OccupancyGrid.h>
 #include <tf2/LinearMath/Quaternion.h>
 
 // TUNING PARAMETERS
@@ -72,46 +74,46 @@ class Node{
         
         Node(double xPos, double yPos, int id, double stepLength) : 
              xPos(xPos), yPos(yPos), id(id), stepLength(stepLength){
-            ROS_INFO_STREAM("Node id: " << this->id);
+            ROS_INFO_STREAM("Node id: " << id);
         }
 
-        void calcNewNodePos(Node nearestNode, double distance) {
+        void calcNewNodePos(const Node& nearestNode, double distance) {
             ROS_INFO_STREAM("Distance to node for connection: " << distance);
-            double dx = static_cast<double>(xPos - nearestNode.xPos) / distance;
-            double dy = static_cast<double>(yPos - nearestNode.yPos) / distance;
-            this->xPos = nearestNode.xPos + dx * stepLength;
-            this->yPos = nearestNode.yPos + dy * stepLength;
-            ROS_INFO_STREAM("new xPos: " << this->xPos);
-            ROS_INFO_STREAM("new yPos: " << this->yPos);
+            double dx = static_cast<double>(xPos - nearestNode->xPos) / distance;
+            double dy = static_cast<double>(yPos - nearestNode->yPos) / distance;
+            xPos = nearestNode->xPos + dx * stepLength;
+            yPos = nearestNode->yPos + dy * stepLength;
+            ROS_INFO_STREAM("new xPos: " << xPos);
+            ROS_INFO_STREAM("new yPos: " << yPos);
         }
 
-        bool checkDynamicConstraints(Node nodeParent){
+        bool checkDynamicConstraints(const Node& nodeParent){
 
-            double xDelta = this->xPos - nodeParent.xPos;
-            double yDelta = this->yPos - nodeParent.yPos;
+            double xDelta = xPos - nodeParent->xPos;
+            double yDelta = yPos - nodeParent->yPos;
             double nodeHeading = atan2((yDelta), xDelta);
             ROS_INFO_STREAM("Node heading calc: " << nodeHeading);
-            double headingDiff = calcHeadingDiff(nodeHeading,nodeParent.headingAngle);
+            double headingDiff = calcHeadingDiff(nodeHeading,nodeParent->headingAngle);
             ROS_INFO_STREAM("Node heading diff: " << headingDiff);
             if (headingDiff < maxAngleDiff) {
-                this->headingAngle = nodeHeading;
+                headingAngle = nodeHeading;
                 return false;
             }
             
             return true;
         }
 
-        Node FindNearestNode(std::vector<Node> Tree) {
+        Node FindNearestNode(const std::vector<Node>& Tree) {
             Node nearestNode = Tree[0];
 
             ROS_INFO_STREAM("Node " << id << " has position " << xPos << "," << yPos);
 
-            double nearestDist = calcDistance(xPos,yPos,Tree[0].xPos,Tree[0].yPos);
+            double nearestDist = calcDistance(xPos,yPos,Tree[0].xPos,Tree[0]->yPos);
 
             ROS_INFO_STREAM("Tree size: " << Tree.size());
 
             for(int i = 1; i < Tree.size(); i++) {
-                double dist = calcDistance(xPos,yPos,Tree[i].xPos,Tree[i].yPos);
+                double dist = calcDistance(xPos,yPos,Tree[i].xPos,Tree[i]->yPos);
                 if (dist < nearestDist) {
                     nearestNode = Tree[i];
                     nearestDist = dist;
@@ -121,7 +123,7 @@ class Node{
             ROS_INFO_STREAM("Nearest node to " << id << " is " << nearestNode.id 
                             << "with distance: " << nearestDist);
 
-            this->idParent = nearestNode.id;
+            idParent = nearestNode.id;
 
             calcNewNodePos(nearestNode,nearestDist);
 
@@ -133,14 +135,15 @@ class Node{
 
 class GlobalPlanner{
     public:
+        
+        // Map variables
         std::string frameIdMap = "map";
         double mapResolution; // [m/cell]
         int mapWidth; // [cells]
         int mapHeight; // [cells]
         std::vector<int> mapData;
 
-        std::vector<geometry_msgs::PoseStamped::ConstPtr> pose;
-
+        // Current pose variables
         double xCurrent;
         double yCurrent;
         double zCurrent;
@@ -149,6 +152,7 @@ class GlobalPlanner{
         double zQuatCurrent;
         double wQuatCurrent;
 
+        // Goal variables
         double xGoal;
         double yGoal;
         double z_goal;
@@ -157,12 +161,6 @@ class GlobalPlanner{
         double z_quat_goal;
         double w_quat_goal;
         EulerAngles goalEuler;
-
-        typedef std::mt19937 MyRNG;
-        MyRNG rng;
-
-        std::uniform_int_distribution<uint32_t> widthGenerator;
-        std::uniform_int_distribution<uint32_t> heightGenerator;
 
         GlobalPlanner(const geometry_msgs::PoseStamped::ConstPtr& poseMsg, 
                       const nav_msgs::OccupancyGrid::ConstPtr& mapMsg,
@@ -194,36 +192,40 @@ class GlobalPlanner{
             for (const auto& value : mapMsg->data) {
                 mapData.push_back(static_cast<int>(value));
             }
+        }
 
-            std::uniform_int_distribution<uint32_t> nodeIsGoalBias = std::uniform_int_distribution<uint32_t>(0, 99);
+        std::tuple<double, double> RandomPos() const {
+            typedef std::mt19937 MyRNG;
+            MyRNG rng;
 
             // Random generator
             uint32_t seed_val = 100;
             rng.seed(seed_val);
-            widthGenerator = std::uniform_int_distribution<uint32_t>(0, mapWidth);
-            heightGenerator = std::uniform_int_distribution<uint32_t>(0, mapHeight);
-        }
+            std::uniform_int_distribution<uint32_t> widthGenerator = std::uniform_int_distribution<uint32_t>(0, frameIdMap);
+            std::uniform_int_distribution<uint32_t> heightGenerator = std::uniform_int_distribution<uint32_t>(0, mapHeight);
 
-        std::tuple<double, double> CellToCoordinate(int xCell, int yCell) {
+            int xCell = widthGenerator(rng);
+            int yCell = heightGenerator(rng);
+            
             double xPos = (xCell - mapWidth/2)*mapResolution;
             double yPos = (yCell - mapHeight/2)*mapResolution;
             return {xPos, yPos};
         }
 
-        bool checkForObstacle(Node node) {
-            int xMapCell = node.xPos / mapResolution + mapWidth/2;
-            int yMapCell = node.yPos / mapResolution + mapHeight/2;
+        bool checkForObstacle(const Node& node) {
+            int xMapCell = node->xPos / mapResolution + mapWidth/2;
+            int yMapCell = node->yPos / mapResolution + mapHeight/2;
 
             int mapDataIndex = yMapCell*mapHeight + xMapCell;
             
-            if (this->mapData[mapDataIndex] != 0){
+            if (mapData[mapDataIndex] != 0){
                 return true;
             } else {
                 return false;
             }
         }
 
-        nav_msgs::Path createPathToGoal(std::vector<Node> Tree) {
+        nav_msgs::Path createPathToGoal(const std::vector<Node>& Tree) {
             
             ROS_INFO_STREAM("Goal node reached, creating path msg");
 
@@ -276,7 +278,7 @@ class GlobalPlanner{
             return path;
         }
 
-        const nav_msgs::Path createPath(ros::Publisher pub){
+        const nav_msgs::Path createPath(){
 
             nav_msgs::Path path;
 
@@ -295,18 +297,20 @@ class GlobalPlanner{
             std::vector<Node> Tree;
             Tree.push_back(nodeOrigin);
 
+            std::uniform_int_distribution<uint32_t> nodeIsGoalBias = std::uniform_int_distribution<uint32_t>(0, 99);
+
+            double xPosNode, yPosNode;
             for(int iRrt  = 1; iRrt < maxIterationsRrt; iRrt++) {
                 
-                int xCell = widthGenerator(rng);
-                int yCell = heightGenerator(rng);
-
-                auto [xPosNode, yPosNode] = CellToCoordinate(xCell,yCell);
+                
 
                 // Randomly set the new node in the goal position 
                 if(nodeIsGoalBias(rng) < goalBias){
                     ROS_INFO_STREAM("Node is set to goal");
                     xPosNode = xGoal;
                     yPosNode = yGoal;
+                } else {
+                    [xPosNode, yPosNode] = RandomPos();
                 }
 
                 Node newNode(xPosNode,yPosNode,iRrt,stepLength);
@@ -365,7 +369,7 @@ int main(int argc, char** argv) {
 
     ros::Rate r(10); // 10 hz
 
-    nav_msgs::Path path = planner.createPath(pub);
+    nav_msgs::Path path = planner.createPath();
 
     while(ros::ok()) {
 
