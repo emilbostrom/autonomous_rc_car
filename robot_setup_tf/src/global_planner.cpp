@@ -201,7 +201,7 @@ class GlobalPlanner{
             rng.seed(seed_val);
         }
 
-        std::tuple<double, double> RandomPos() const {
+        std::tuple<double, double> RandomPos() {
             std::uniform_int_distribution<uint32_t> widthGenerator(0, mapWidth);
             std::uniform_int_distribution<uint32_t> heightGenerator(0, mapHeight);
 
