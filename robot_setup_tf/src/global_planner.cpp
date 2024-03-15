@@ -95,7 +95,7 @@ class Node{
             ROS_INFO_STREAM("Node heading calc: " << nodeHeading);
             double headingDiff = calcHeadingDiff(nodeHeading,nodeParent.headingAngle);
             ROS_INFO_STREAM("Node heading diff: " << headingDiff);
-            if (headingDiff < maxAngleDiff) {
+            if (abs(headingDiff) < maxAngleDiff) {
                 headingAngle = nodeHeading;
                 return false;
             }
@@ -298,7 +298,7 @@ class GlobalPlanner{
             std::vector<Node> Tree;
             Tree.push_back(nodeOrigin);
 
-            std::uniform_int_distribution<uint32_t> nodeIsGoalBias = std::uniform_int_distribution<uint32_t>(0, 99);
+             std::uniform_int_distribution<uint32_t> nodeIsGoalBias(0, 99);
 
             double xPosNode, yPosNode, distToGoal;
             for(int iRrt  = 1; iRrt < maxIterationsRrt; iRrt++) {
@@ -335,7 +335,7 @@ class GlobalPlanner{
                 distToGoal = calcDistance(newNode.xPos,newNode.yPos,xGoal,yGoal);
                 
                 double headingDiffToGoal = calcHeadingDiff(newNode.headingAngle,goalEuler.yaw);
-                if (distToGoal < goalDistThreshold && headingDiffToGoal < maxAngleDiff) {
+                if (distToGoal < goalDistThreshold && abs(headingDiffToGoal) < maxAngleDiff) {
                     path = createPathToGoal(Tree);
                     return path;
                 }
