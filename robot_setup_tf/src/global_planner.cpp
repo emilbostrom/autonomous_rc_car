@@ -57,7 +57,16 @@ double calcDistance(double x1, double y1, double x2, double y2) {
 }
 
 double calcHeadingDiff(double heading1, double heading2) {
-    return M_PI/2 - abs(abs(heading1 - heading2) - M_PI/2);
+    double headingDiff = heading1 - heading2;
+    ROS_INFO_STREAM("Node heading diff: " << headingDiff);
+    
+    while (headingDiff > M_PI) {
+        headingDiff -= 2.0 * M_PI;
+    } 
+    while (headingDiff <= -M_PI) {
+        headingDiff += 2.0 * M_PI;
+    }
+    return headingDiff;
 }
 
 class Node{
@@ -80,8 +89,15 @@ class Node{
             ROS_INFO_STREAM("Distance to node for connection: " << distance);
             double dx = static_cast<double>(xPos - nearestNode.xPos) / distance;
             double dy = static_cast<double>(yPos - nearestNode.yPos) / distance;
-            xPos = nearestNode.xPos + std::min(dx, dx * stepLength);
-            yPos = nearestNode.yPos + std::min(dy, dy * stepLength);
+            if (distance < stepLength) {
+                dx = xPos - nearestNode.xPos;
+                dy = yPos - nearestNode.yPos;
+            } else {
+                dx = static_cast<double>(xPos - nearestNode.xPos) / distance;
+                dy = static_cast<double>(yPos - nearestNode.yPos) / distance;
+            }
+            xPos = nearestNode.xPos + dx;
+            yPos = nearestNode.yPos + dy;
             ROS_INFO_STREAM("stepLength: " << stepLength);
             ROS_INFO_STREAM("dx: " << dx);
             ROS_INFO_STREAM("dy: " << dy);
@@ -96,15 +112,7 @@ class Node{
             double nodeHeading = atan2(yDelta,xDelta);
             
             ROS_INFO_STREAM("Node heading calc: " << nodeHeading);
-            //double headingDiff = calcHeadingDiff(nodeHeading,nodeParent.headingAngle);
-            double headingDiff = nodeHeading - nodeParent.headingAngle;
-            ROS_INFO_STREAM("Node heading diff: " << headingDiff);
-            while (headingDiff > M_PI) {
-                headingDiff -= 2.0 * M_PI;
-            } 
-            while (headingDiff <= -M_PI) {
-                headingDiff += 2.0 * M_PI;
-            }
+            double headingDiff = calcHeadingDiff(nodeHeading,nodeParent.headingAngle);
         
             if (abs(headingDiff) < maxAngleDiff) {
                 headingAngle = nodeHeading;
