@@ -94,7 +94,8 @@ class Node{
             if (distance > stepLength) {
                 dx = dx*stepLength;
                 dy = dy*stepLength;
-                
+            }
+
             xPos = nearestNode.xPos + dx;
             yPos = nearestNode.yPos + dy;
             ROS_INFO_STREAM("stepLength: " << stepLength);
