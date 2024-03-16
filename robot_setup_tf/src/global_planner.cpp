@@ -313,7 +313,7 @@ class GlobalPlanner{
             if (goalFound != true) {
                 ROS_INFO_STREAM("Goal node not found, creating path to closest node");
                 Node& closestNode = nodePrev;
-                double closestDist = 10000;
+                double closestDist = 10000.0;
                 double dist;
                 for (const Node& node : Tree) {
                     dist = calcDistance(node.xPos,node.yPos,xGoal,yGoal);
