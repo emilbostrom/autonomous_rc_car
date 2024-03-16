@@ -95,7 +95,7 @@ class Node{
                 dy = dy*stepLength;
             }
 
-            std::tie(dx,dy) = checkDynamicConstraints(dx,dy);
+            std::tie(dx,dy) = checkDynamicConstraints(dx,dy,nearestNode);
 
             xPos = nearestNode.xPos + dx;
             yPos = nearestNode.yPos + dy;
