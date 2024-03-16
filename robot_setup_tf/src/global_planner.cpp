@@ -216,10 +216,10 @@ class GlobalPlanner{
             
             mapMin = 0;
             mapMax = 0;
-            int val, i;
+            int val;
+            int i = 0;
             for (const auto& value : mapMsg->data) {
                 i++;
-                ROS_INFO_STREAM("i: " << i);
                 val = static_cast<int>(value);
                 mapData.push_back(static_cast<int>(value));
                 if (val == -1 ) {
