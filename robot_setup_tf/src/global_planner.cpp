@@ -115,10 +115,10 @@ class Node{
         
             if (abs(headingDiff) > maxAngleDiff) {
                 ROS_INFO_STREAM("Heading max:");
-                ROS_INFO_STREAM("Previous heading: " headingAngle);
+                ROS_INFO_STREAM("Previous heading: " << headingAngle);
                 int headingSign = (headingDiff > 0) - (headingDiff < 0);
                 headingAngle = sin(headingSign*maxAngleDiff + nodeParent.headingAngle);
-                ROS_INFO_STREAM("New heading: " headingAngle);
+                ROS_INFO_STREAM("New heading: " << headingAngle);
                 ROS_INFO_STREAM("Prev dx: " << dx);
                 ROS_INFO_STREAM("Prev dy: " << dy);
                 dx = cos(newHeading)*stepLength;
