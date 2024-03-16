@@ -247,7 +247,7 @@ class GlobalPlanner{
 
             Quaternion quatGoal = {x_quat_goal, y_quat_goal, z_quat_goal, w_quat_goal};
             goalEuler = ToEulerAngles(quatGoal);
-            ROS_INFO_STREAM("goalEuler:" << goalEuler);
+            ROS_INFO_STREAM("goalEuler:" << goalEuler.yaw);
 
             mapResolution = mapMsg->info.resolution;
             mapWidth = mapMsg->info.width;
