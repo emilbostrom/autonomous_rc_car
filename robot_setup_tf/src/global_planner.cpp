@@ -311,7 +311,7 @@ class GlobalPlanner{
             
             nav_msgs::Path path;
             
-            Node& nodePrev
+            Node& nodePrev;
             if (goalFound) {
                 nodePrev = Tree.back();
             } else {
@@ -327,26 +327,26 @@ class GlobalPlanner{
                 nodePrev = closestNode;
             }
             
-            ROS_INFO_STREAM("First node id: " << nodePrev.id);
-            ROS_INFO_STREAM("First node parent id: " << nodePrev.idParent);
+            ROS_INFO_STREAM("First node id: " << nodePrev->id);
+            ROS_INFO_STREAM("First node parent id: " << nodePrev->idParent);
             
             for (int i = Tree.size() - 1; i >= 0; --i) {
-                Node node = Tree[i];
-                if(node.id != nodePrev.idParent) {
+                Node& node = Tree[i];
+                if(node->id != nodePrev->idParent) {
                     continue;
                 }
-                ROS_INFO_STREAM("Node id: " << node.id);
+                ROS_INFO_STREAM("Node id: " << node->id);
 
-                pose.position.x = node.xPos;
-                pose.position.y = node.yPos;
+                pose.position.x = node->xPos;
+                pose.position.y = node->yPos;
                 pose.position.z = 0;
 
                 tf2::Quaternion quat;
-                quat.setRPY(0,0,node.headingAngle);
+                quat.setRPY(0,0,node->headingAngle);
                 quat=quat.normalize();
 
-                ROS_INFO_STREAM("Node heading angle: " << node.headingAngle);
-                ROS_INFO_STREAM("Node parent id: " << node.idParent);
+                ROS_INFO_STREAM("Node heading angle: " << node->headingAngle);
+                ROS_INFO_STREAM("Node parent id: " << node->idParent);
 
                 pose.orientation.x = quat.getX();
                 pose.orientation.y = quat.getY();
