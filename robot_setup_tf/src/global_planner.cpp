@@ -311,10 +311,11 @@ class GlobalPlanner{
             
             nav_msgs::Path path;
             
+            Node& nodePrev
             if (goalFound) {
-                Node nodePrev = Tree.back();
+                nodePrev = Tree.back();
             } else {
-                Node closestNode;
+                Node& closestNode;
                 double closestDist = 10000;
                 double dist;
                 for (const Node& node : Tree) {
@@ -323,7 +324,7 @@ class GlobalPlanner{
                         closestNode = node;
                     }
                 }
-                Node nodePrev = closestNode;
+                nodePrev = closestNode;
             }
             
             ROS_INFO_STREAM("First node id: " << nodePrev.id);
