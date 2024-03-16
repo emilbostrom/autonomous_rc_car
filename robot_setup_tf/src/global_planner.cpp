@@ -17,11 +17,12 @@
 #include <tf2/LinearMath/Matrix3x3.h>
 
 // TUNING PARAMETERS
-const double maxAngleDiff = 0.25;// M_PI/8; 
+const double maxAngleDiff = 0.1; // [rad] 
 const int goalBias = 5; // How often should the new node be set in goal
 const int maxIterationsRrt = 2000;
 const double stepLength = 0.1; // [m]
 const double goalDistThreshold = 3*stepLength; // [m]
+const double angleDiffThreshold = M_PI/4; // [rad]
 const double obstacleDistThreshold = stepLength; // [m]
 
 struct Quaternion {
@@ -398,7 +399,8 @@ class GlobalPlanner{
                 distToGoal = calcDistance(newNode.xPos,newNode.yPos,xGoal,yGoal);
                 
                 double headingDiffToGoal = calcHeadingDiff(newNode.headingAngle,goalHeading);
-                if (distToGoal < goalDistThreshold && abs(headingDiffToGoal) < maxAngleDiff) {
+                if (distToGoal < goalDistThreshold && abs(headingDiffToGoal) < angleDiffThreshold) {
+                    ROS_INFO_STREAM("Goal is found, calculating path");
                     path = createPathToGoal(Tree,true);
                     return path;
                 }
