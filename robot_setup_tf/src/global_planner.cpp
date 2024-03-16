@@ -220,15 +220,16 @@ class GlobalPlanner{
             for (const auto& value : mapMsg->data) {
                 val = static_cast<int>(value);
                 mapData.push_back(static_cast<int>(value));
-                if (val != 0 and val != 100) {
-                    if (mapMin == 0) {
-                        mapMin = i;
-                    }
-                    mapMax = i;
+                if (val == -1 ) {
+                    continue;
                 }
+                if (mapMin == 0) {
+                    mapMin = i;
+                }
+                mapMax = i;
                 i++;
             }
-
+            
             seed_val = 100;
             rng.seed(seed_val);
         }
@@ -238,6 +239,8 @@ class GlobalPlanner{
             int yCellMax = mapMax/mapHeight;
             int xCellMin = mapMin % mapWidth;
             int xCellMax = mapMax % mapWidth;
+            ROS_INFO_STREAM("mapMin: " << mapMin);
+            ROS_INFO_STREAM("mapMax: " << mapMax);
             ROS_INFO_STREAM("yCellMin: " << yCellMin);
             ROS_INFO_STREAM("yCellMax: " << yCellMax);
             ROS_INFO_STREAM("xCellMin: " << xCellMin);
