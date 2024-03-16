@@ -118,6 +118,12 @@ class Node{
                 ROS_INFO_STREAM("Previous heading: " << headingAngle);
                 int headingSign = (headingDiff > 0) - (headingDiff < 0);
                 headingAngle = headingSign*maxAngleDiff + nodeParent.headingAngle;
+                while (headingAngle > M_PI) {
+                    headingAngle -= 2.0 * M_PI;
+                } 
+                while (headingAngle <= -M_PI) {
+                    headingAngle += 2.0 * M_PI;
+                }
                 ROS_INFO_STREAM("New heading: " << headingAngle);
                 ROS_INFO_STREAM("Prev dx: " << dx);
                 ROS_INFO_STREAM("Prev dy: " << dy);
