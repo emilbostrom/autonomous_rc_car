@@ -299,8 +299,6 @@ class GlobalPlanner{
         }
 
         nav_msgs::Path createPathToGoal(const std::vector<Node>& Tree, bool goalFound) {
-            
-            ROS_INFO_STREAM("Goal node reached, creating path msg");
 
             std::vector<geometry_msgs::PoseStamped> posesStampedVectorMsg;
             
@@ -313,11 +311,13 @@ class GlobalPlanner{
             
             Node nodePrev =  Tree.back();
             if (goalFound != true) {
+                ROS_INFO_STREAM("Goal node not found, creating path to closest node");
                 Node& closestNode = nodePrev;
                 double closestDist = 10000;
                 double dist;
                 for (const Node& node : Tree) {
                     dist = calcDistance(node.xPos,node.yPos,xGoal,yGoal);
+                    ROS_INFO_STREAM("Dist for node " << node.id << ": " << dist);
                     if (dist < closestDist) {
                         closestNode = node;
                     }
