@@ -32,27 +32,6 @@ struct EulerAngles {
     double roll, pitch, yaw;
 };
 
-EulerAngles ToEulerAngles(Quaternion q) {
-    EulerAngles angles;
-
-    // roll (x-axis rotation)
-    double sinr_cosp = 2 * (q.w * q.x + q.y * q.z);
-    double cosr_cosp = 1 - 2 * (q.x * q.x + q.y * q.y);
-    angles.roll = std::atan2(sinr_cosp, cosr_cosp);
-
-    // pitch (y-axis rotation)
-    double sinp = std::sqrt(1 + 2 * (q.w * q.y - q.x * q.z));
-    double cosp = std::sqrt(1 - 2 * (q.w * q.y - q.x * q.z));
-    angles.pitch = 2 * std::atan2(sinp, cosp) - M_PI / 2;
-
-    // yaw (z-axis rotation)
-    double siny_cosp = 2 * (q.w * q.z + q.x * q.y);
-    double cosy_cosp = 1 - 2 * (q.y * q.y + q.z * q.z);
-    angles.yaw = std::atan2(siny_cosp, cosy_cosp);
-
-    return angles;
-}
-
 double calcDistance(double x1, double y1, double x2, double y2) {
     return sqrt(pow((x2-x1),2) + pow((y2-y1),2));
 }
@@ -66,7 +45,6 @@ double calcHeadingDiff(double heading1, double heading2) {
     while (headingDiff <= -M_PI) {
         headingDiff += 2.0 * M_PI;
     }
-    ROS_INFO_STREAM("Node heading diff: " << headingDiff);
     return headingDiff;
 }
 
@@ -87,7 +65,6 @@ class Node{
         }
 
         void calcNewNodePos(const Node& nearestNode, double distance) {
-            ROS_INFO_STREAM("Distance to node for connection: " << distance);
             double dx = static_cast<double>(xPos - nearestNode.xPos) / distance;
             double dy = static_cast<double>(yPos - nearestNode.yPos) / distance;
 
@@ -100,7 +77,6 @@ class Node{
 
             xPos = nearestNode.xPos + dx;
             yPos = nearestNode.yPos + dy;
-            ROS_INFO_STREAM("stepLength: " << stepLength);
             ROS_INFO_STREAM("dx: " << dx);
             ROS_INFO_STREAM("dy: " << dy);
             ROS_INFO_STREAM("new xPos: " << xPos);
@@ -136,23 +112,6 @@ class Node{
             
             return {dx,dy};
         }
-
-        /*bool checkDynamicConstraints(const Node& nodeParent){
-
-            double xDelta = xPos - nodeParent.xPos;
-            double yDelta = yPos - nodeParent.yPos;
-            double nodeHeading = atan2(yDelta,xDelta);
-            
-            ROS_INFO_STREAM("Node heading calc: " << nodeHeading);
-            double headingDiff = calcHeadingDiff(nodeHeading,nodeParent.headingAngle);
-        
-            if (abs(headingDiff) < maxAngleDiff) {
-                headingAngle = nodeHeading;
-                return false;
-            }
-            
-            return true;
-        }*/
 
         Node findNearestNode(const std::vector<Node>& Tree) {
             Node nearestNode = Tree[0];
@@ -221,7 +180,6 @@ class GlobalPlanner{
                       const nav_msgs::OccupancyGrid::ConstPtr& mapMsg,
                       const geometry_msgs::PoseStamped::ConstPtr& goalMsg) {
             
-            ROS_INFO_STREAM("Received pose: " << poseMsg);
             xCurrent = poseMsg->pose.position.x;
             yCurrent = poseMsg->pose.position.y;
             zCurrent = poseMsg->pose.position.z;
@@ -232,11 +190,6 @@ class GlobalPlanner{
 
             ROS_INFO_STREAM("xCurrent: " << xCurrent);
             ROS_INFO_STREAM("yCurrent: " << yCurrent);
-            ROS_INFO_STREAM("zCurrent: " << zCurrent);
-            ROS_INFO_STREAM("xQuatCurrent: " << xQuatCurrent);
-            ROS_INFO_STREAM("yQuatCurrent: " << yQuatCurrent);
-            ROS_INFO_STREAM("zQuatCurrent: " << zQuatCurrent);
-            ROS_INFO_STREAM("wQuatCurrent: " << wQuatCurrent);
 
             xGoal = goalMsg->pose.position.x;
             yGoal = goalMsg->pose.position.y;
@@ -252,6 +205,8 @@ class GlobalPlanner{
             double rollGoal, pitchGoal, yawGoal;
             m.getRPY(rollGoal, pitchGoal, yawGoal);
             goalHeading = yawGoal;
+            ROS_INFO_STREAM("xGoal: " << xGoal);
+            ROS_INFO_STREAM("yGoal: " << yGoal);
             ROS_INFO_STREAM("goalHeading:" << goalHeading);
 
             mapResolution = mapMsg->info.resolution;
@@ -375,16 +330,12 @@ class GlobalPlanner{
             Node nodeOrigin(xCurrent,yCurrent,idOrigin);
             nodeOrigin.idParent = 0;
             nodeOrigin.cost = 0;
-            // Quaternion quat = {xQuatCurrent, yQuatCurrent, zQuatCurrent, wQuatCurrent};
-            // EulerAngles angle = ToEulerAngles(quat);
             tf2::Quaternion q(xQuatCurrent, yQuatCurrent, zQuatCurrent, wQuatCurrent);
             tf2::Matrix3x3 m(q);
             double roll, pitch, yaw;
             m.getRPY(roll, pitch, yaw);
             nodeOrigin.headingAngle = yaw;
 
-            ROS_INFO_STREAM("roll:" << roll);
-            ROS_INFO_STREAM("pitch:" << pitch);
             ROS_INFO_STREAM("First node heading: " << nodeOrigin.headingAngle);
 
             // Create an array of all nodes
@@ -406,12 +357,6 @@ class GlobalPlanner{
 
                 Node newNode(xPosNode,yPosNode,iRrt);
                 Node parentNode = newNode.findNearestNode(Tree);
-
-                /*bool dynamicConstraint = newNode.checkDynamicConstraints(parentNode);
-                if (dynamicConstraint) {
-                    ROS_INFO_STREAM("Node does not meet dynamic constraints, skipped");
-                    continue;
-                }*/
 
                 bool nodeInObstacle = checkForObstacle(newNode);
                 if (nodeInObstacle) {
