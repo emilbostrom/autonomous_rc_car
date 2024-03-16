@@ -152,6 +152,7 @@ class GlobalPlanner{
         int mapWidth; // [cells]
         int mapHeight; // [cells]
         std::vector<int> mapData;
+        int mapMin, mapMax;
 
         // Current pose variables
         double xCurrent;
@@ -212,8 +213,20 @@ class GlobalPlanner{
             mapResolution = mapMsg->info.resolution;
             mapWidth = mapMsg->info.width;
             mapHeight = mapMsg->info.height;
+            
+            mapMin = 0;
+            mapMax = 0;
+            int val, i;
             for (const auto& value : mapMsg->data) {
+                val = static_cast<int>(value)
                 mapData.push_back(static_cast<int>(value));
+                if (val != 0 and val != 100) {
+                    if mapMin == 0 {
+                        mapMin = i;
+                    }
+                    mapMax = i;
+                }
+                i++;
             }
 
             seed_val = 100;
@@ -221,8 +234,16 @@ class GlobalPlanner{
         }
 
         std::tuple<double, double> randomPos() {
-            std::uniform_int_distribution<uint32_t> widthGenerator(0, mapWidth);
-            std::uniform_int_distribution<uint32_t> heightGenerator(0, mapHeight);
+            int yCellMin = mapMin/mapHeight;
+            int yCellMax = mapMax/mapHeight;
+            int xCellMin = mapMin % mapWidth;
+            int xCellMax = mapMax % mapWidth;
+            ROS_INFO_STREAM("yCellMin: " << yCellMin);
+            ROS_INFO_STREAM("yCellMax: " << yCellMax);
+            ROS_INFO_STREAM("xCellMin: " << xCellMin);
+            ROS_INFO_STREAM("xCellMax: " << xCellMax);
+            std::uniform_int_distribution<uint32_t> widthGenerator(xCellMin, xCellMax);
+            std::uniform_int_distribution<uint32_t> heightGenerator(yCellMin, yCellMax);
 
 
             int xCell = widthGenerator(rng);
