@@ -108,15 +108,17 @@ class Node{
 
         std::tuple<double, double> checkDynamicConstraints(double dx, double dy, const Node& nodeParent){
 
-            double nodeHeading = atan2(dx,dy);
+            double headingAngle = atan2(dx,dy);
             
-            ROS_INFO_STREAM("Node heading calc: " << nodeHeading);
-            double headingDiff = calcHeadingDiff(nodeHeading,nodeParent.headingAngle);
+            ROS_INFO_STREAM("Node heading calc: " << headingAngle);
+            double headingDiff = calcHeadingDiff(headingAngle,nodeParent.headingAngle);
         
             if (abs(headingDiff) > maxAngleDiff) {
-                int headingSign = (headingDiff > 0) - (headingDiff < 0);
-                double newHeading = sin(headingSign*maxAngleDiff + nodeParent.headingAngle);
                 ROS_INFO_STREAM("Heading max:");
+                ROS_INFO_STREAM("Previous heading: " headingAngle);
+                int headingSign = (headingDiff > 0) - (headingDiff < 0);
+                headingAngle = sin(headingSign*maxAngleDiff + nodeParent.headingAngle);
+                ROS_INFO_STREAM("New heading: " headingAngle);
                 ROS_INFO_STREAM("Prev dx: " << dx);
                 ROS_INFO_STREAM("Prev dy: " << dy);
                 dx = cos(newHeading)*stepLength;
