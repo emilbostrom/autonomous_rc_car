@@ -218,10 +218,10 @@ class GlobalPlanner{
             mapMax = 0;
             int val, i;
             for (const auto& value : mapMsg->data) {
-                val = static_cast<int>(value)
+                val = static_cast<int>(value);
                 mapData.push_back(static_cast<int>(value));
                 if (val != 0 and val != 100) {
-                    if mapMin == 0 {
+                    if (mapMin == 0) {
                         mapMin = i;
                     }
                     mapMax = i;
