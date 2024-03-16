@@ -210,7 +210,7 @@ class GlobalPlanner{
         double y_quat_goal;
         double z_quat_goal;
         double w_quat_goal;
-        EulerAngles goalEuler;
+        double goalHeading;
 
         // Random generator
         std::mt19937 rng;
@@ -245,9 +245,13 @@ class GlobalPlanner{
             z_quat_goal = goalMsg->pose.orientation.z;
             w_quat_goal = goalMsg->pose.orientation.w;
 
-            Quaternion quatGoal = {x_quat_goal, y_quat_goal, z_quat_goal, w_quat_goal};
-            goalEuler = ToEulerAngles(quatGoal);
-            ROS_INFO_STREAM("goalEuler:" << goalEuler.yaw);
+            //Quaternion quatGoal = {x_quat_goal, y_quat_goal, z_quat_goal, w_quat_goal};
+            tf2::Quaternion q(x_quat_goal, y_quat_goal, z_quat_goal, w_quat_goal);
+            tf2::Matrix3x3 m(q);
+            double rollGoal, pitchGoal, yawGoal;
+            m.getRPY(rollGoal, pitchGoal, yawGoal);
+            goalHeading = yawGoal;
+            ROS_INFO_STREAM("goalHeading:" << goalHeading);
 
             mapResolution = mapMsg->info.resolution;
             mapWidth = mapMsg->info.width;
@@ -349,12 +353,16 @@ class GlobalPlanner{
             Node nodeOrigin(xCurrent,yCurrent,idOrigin);
             nodeOrigin.idParent = 0;
             nodeOrigin.cost = 0;
-            Quaternion quat = {xQuatCurrent, yQuatCurrent, zQuatCurrent, wQuatCurrent};
-            EulerAngles angle = ToEulerAngles(quat);
-            nodeOrigin.headingAngle = angle.yaw;
+            // Quaternion quat = {xQuatCurrent, yQuatCurrent, zQuatCurrent, wQuatCurrent};
+            // EulerAngles angle = ToEulerAngles(quat);
+            tf2::Quaternion q(xQuatCurrent, yQuatCurrent, zQuatCurrent, wQuatCurrent);
+            tf2::Matrix3x3 m(q);
+            double roll, pitch, yaw;
+            m.getRPY(roll, pitch, yaw);
+            nodeOrigin.headingAngle = yaw;
 
-            ROS_INFO_STREAM("angle.roll:" << angle.roll);
-            ROS_INFO_STREAM("angle.pitch:" << angle.pitch);
+            ROS_INFO_STREAM("roll:" << roll);
+            ROS_INFO_STREAM("pitch:" << pitch);
             ROS_INFO_STREAM("First node heading: " << nodeOrigin.headingAngle);
 
             // Create an array of all nodes
@@ -397,7 +405,7 @@ class GlobalPlanner{
                 
                 distToGoal = calcDistance(newNode.xPos,newNode.yPos,xGoal,yGoal);
                 
-                double headingDiffToGoal = calcHeadingDiff(newNode.headingAngle,goalEuler.yaw);
+                double headingDiffToGoal = calcHeadingDiff(newNode.headingAngle,goalHeading);
                 if (distToGoal < goalDistThreshold && abs(headingDiffToGoal) < maxAngleDiff) {
                     path = createPathToGoal(Tree);
                     return path;
