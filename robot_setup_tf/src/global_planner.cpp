@@ -298,14 +298,14 @@ class GlobalPlanner{
             return false;
         }
 
-        void findNodeClosestToGoal(const Node& nodePrev, const std::vector<Node>& Tree) {
+        void findNodeClosestToGoal(Node& nodePrev, const std::vector<Node>& Tree) {
             ROS_INFO_STREAM("Goal node not found, creating path to closest node");
             double closestDist = 10000.0;
             double dist;
             for (const Node& node : Tree) {
                 dist = calcDistance(node.xPos,node.yPos,xGoal,yGoal);
                 if (dist < closestDist) {
-                    nodePrev = &node;
+                    nodePrev = node;
                     closestDist = dist;
                 }
             }
