@@ -320,6 +320,7 @@ class GlobalPlanner{
                     ROS_INFO_STREAM("Dist for node " << node.id << ": " << dist);
                     if (dist < closestDist) {
                         closestNode = node;
+                        closestDist = dist;
                     }
                 }
                 nodePrev = closestNode;
