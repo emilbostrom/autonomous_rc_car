@@ -89,12 +89,13 @@ class Node{
             ROS_INFO_STREAM("Distance to node for connection: " << distance);
             double dx = static_cast<double>(xPos - nearestNode.xPos) / distance;
             double dy = static_cast<double>(yPos - nearestNode.yPos) / distance;
-            dx = static_cast<double>(xPos - nearestNode.xPos) / distance;
-            dy = static_cast<double>(yPos - nearestNode.yPos) / distance;
+
             if (distance > stepLength) {
                 dx = dx*stepLength;
                 dy = dy*stepLength;
             }
+
+            std::tie(dx,dy) = checkDynamicConstraints(dx,dy);
 
             xPos = nearestNode.xPos + dx;
             yPos = nearestNode.yPos + dy;
@@ -105,7 +106,24 @@ class Node{
             ROS_INFO_STREAM("new yPos: " << yPos);
         }
 
-        bool checkDynamicConstraints(const Node& nodeParent){
+        std::tuple<double, double> checkDynamicConstraints(double dx, double dy, const Node& nodeParent){
+
+            double nodeHeading = atan2(dx,dy);
+            
+            ROS_INFO_STREAM("Node heading calc: " << nodeHeading);
+            double headingDiff = calcHeadingDiff(nodeHeading,nodeParent.headingAngle);
+        
+            if (abs(headingDiff) > maxAngleDiff) {
+                int headingSign = (headingDiff > 0) - (headingDiff < 0);
+                double newHeading = sin(headingSign*maxAngleDiff + nodeParent.headingAngle);
+                dx = cos(newHeading);
+                dy = sin(newHeading);
+            }
+            
+            return {dx,dy};
+        }
+
+        /*bool checkDynamicConstraints(const Node& nodeParent){
 
             double xDelta = xPos - nodeParent.xPos;
             double yDelta = yPos - nodeParent.yPos;
@@ -120,7 +138,7 @@ class Node{
             }
             
             return true;
-        }
+        }*/
 
         Node FindNearestNode(const std::vector<Node>& Tree) {
             Node nearestNode = Tree[0];
@@ -335,11 +353,11 @@ class GlobalPlanner{
                 Node newNode(xPosNode,yPosNode,iRrt);
                 Node parentNode = newNode.FindNearestNode(Tree);
 
-                bool dynamicConstraint = newNode.checkDynamicConstraints(parentNode);
+                /*bool dynamicConstraint = newNode.checkDynamicConstraints(parentNode);
                 if (dynamicConstraint) {
                     ROS_INFO_STREAM("Node does not meet dynamic constraints, skipped");
                     continue;
-                }
+                }*/
 
                 bool nodeInObstacle = checkForObstacle(newNode);
                 if (nodeInObstacle) {
