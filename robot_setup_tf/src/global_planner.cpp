@@ -108,7 +108,7 @@ class Node{
 
         std::tuple<double, double> checkDynamicConstraints(double dx, double dy, const Node& nodeParent){
 
-            double headingAngle = atan2(dx,dy);
+            headingAngle = atan2(dx,dy);
             
             ROS_INFO_STREAM("Node heading calc: " << headingAngle);
             double headingDiff = calcHeadingDiff(headingAngle,nodeParent.headingAngle);
