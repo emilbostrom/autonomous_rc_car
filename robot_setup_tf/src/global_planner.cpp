@@ -229,6 +229,14 @@ class GlobalPlanner{
             zQuatCurrent = poseMsg->pose.orientation.z;
             wQuatCurrent = poseMsg->pose.orientation.w;
 
+            ROS_INFO_STREAM("xCurrent: " << xCurrent);
+            ROS_INFO_STREAM("yCurrent: " << yCurrent);
+            ROS_INFO_STREAM("zCurrent: " << zCurrent);
+            ROS_INFO_STREAM("xQuatCurrent: " << xQuatCurrent);
+            ROS_INFO_STREAM("yQuatCurrent: " << yQuatCurrent);
+            ROS_INFO_STREAM("zQuatCurrent: " << zQuatCurrent);
+            ROS_INFO_STREAM("wQuatCurrent: " << wQuatCurrent);
+
             xGoal = goalMsg->pose.position.x;
             yGoal = goalMsg->pose.position.y;
             z_goal = goalMsg->pose.position.z;
@@ -239,6 +247,7 @@ class GlobalPlanner{
 
             Quaternion quatGoal = {x_quat_goal, y_quat_goal, z_quat_goal, w_quat_goal};
             goalEuler = ToEulerAngles(quatGoal);
+            ROS_INFO_STREAM("goalEuler:" << goalEuler);
 
             mapResolution = mapMsg->info.resolution;
             mapWidth = mapMsg->info.width;
@@ -344,6 +353,8 @@ class GlobalPlanner{
             EulerAngles angle = ToEulerAngles(quat);
             nodeOrigin.headingAngle = angle.yaw;
 
+            ROS_INFO_STREAM("angle.roll:" << angle.roll);
+            ROS_INFO_STREAM("angle.pitch:" << angle.pitch);
             ROS_INFO_STREAM("First node heading: " << nodeOrigin.headingAngle);
 
             // Create an array of all nodes
