@@ -18,7 +18,7 @@
 
 // TUNING PARAMETERS
 const double maxAngleDiff = 0.5;// M_PI/8; 
-const int goalBias = 10; // How often should the new node be set in goal
+const int goalBias = 1; // How often should the new node be set in goal
 const int maxIterationsRrt = 2000;
 const double stepLength = 0.1; // [m]
 const double goalDistThreshold = 3*stepLength; // [m]
@@ -154,7 +154,7 @@ class Node{
             return true;
         }*/
 
-        Node FindNearestNode(const std::vector<Node>& Tree) {
+        Node findNearestNode(const std::vector<Node>& Tree) {
             Node nearestNode = Tree[0];
 
             ROS_INFO_STREAM("Node " << id << " has position " << xPos << "," << yPos);
@@ -265,7 +265,7 @@ class GlobalPlanner{
             rng.seed(seed_val);
         }
 
-        std::tuple<double, double> RandomPos() {
+        std::tuple<double, double> randomPos() {
             std::uniform_int_distribution<uint32_t> widthGenerator(0, mapWidth);
             std::uniform_int_distribution<uint32_t> heightGenerator(0, mapHeight);
 
@@ -298,6 +298,19 @@ class GlobalPlanner{
             return false;
         }
 
+        void findNodeClosestToGoal(const Node& nodePrev) {
+            ROS_INFO_STREAM("Goal node not found, creating path to closest node");
+            double closestDist = 10000.0;
+            double dist;
+            for (const Node& node : Tree) {
+                dist = calcDistance(node.xPos,node.yPos,xGoal,yGoal);
+                if (dist < closestDist) {
+                    nodePrev = node;
+                    closestDist = dist;
+                }
+            }
+        }
+
         nav_msgs::Path createPathToGoal(const std::vector<Node>& Tree, bool goalFound) {
 
             std::vector<geometry_msgs::PoseStamped> posesStampedVectorMsg;
@@ -311,19 +324,7 @@ class GlobalPlanner{
             
             Node nodePrev =  Tree.back();
             if (goalFound != true) {
-                ROS_INFO_STREAM("Goal node not found, creating path to closest node");
-                Node& closestNode = nodePrev;
-                double closestDist = 10000.0;
-                double dist;
-                for (const Node& node : Tree) {
-                    dist = calcDistance(node.xPos,node.yPos,xGoal,yGoal);
-                    ROS_INFO_STREAM("Dist for node " << node.id << ": " << dist);
-                    if (dist < closestDist) {
-                        closestNode = node;
-                        closestDist = dist;
-                    }
-                }
-                nodePrev = closestNode;
+                findNodeClosestToGoal(nodePrev);
             }
             
             ROS_INFO_STREAM("First node id: " << nodePrev.id);
@@ -400,11 +401,11 @@ class GlobalPlanner{
                     xPosNode = xGoal;
                     yPosNode = yGoal;
                 } else {
-                    std::tie(xPosNode, yPosNode) = RandomPos();
+                    std::tie(xPosNode, yPosNode) = randomPos();
                 }
 
                 Node newNode(xPosNode,yPosNode,iRrt);
-                Node parentNode = newNode.FindNearestNode(Tree);
+                Node parentNode = newNode.findNearestNode(Tree);
 
                 /*bool dynamicConstraint = newNode.checkDynamicConstraints(parentNode);
                 if (dynamicConstraint) {
