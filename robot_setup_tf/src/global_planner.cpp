@@ -218,6 +218,8 @@ class GlobalPlanner{
             mapMax = 0;
             int val, i;
             for (const auto& value : mapMsg->data) {
+                i++;
+                ROS_INFO_STREAM("i: " << i);
                 val = static_cast<int>(value);
                 mapData.push_back(static_cast<int>(value));
                 if (val == -1 ) {
@@ -227,7 +229,6 @@ class GlobalPlanner{
                     mapMin = i;
                 }
                 mapMax = i;
-                i++;
             }
             
             seed_val = 100;
