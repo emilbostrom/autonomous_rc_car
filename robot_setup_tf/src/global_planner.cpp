@@ -21,8 +21,8 @@ const double maxAngleDiff = 0.5;// M_PI/8;
 const int goalBias = 10; // How often should the new node be set in goal
 const int maxIterationsRrt = 2000;
 const double stepLength = 0.1; // [m]
-const double goalDistThreshold = stepLength*2; // [m]
-const double obstacleDistThreshold = stepLength*2; // [m]
+const double goalDistThreshold = 3*stepLength; // [m]
+const double obstacleDistThreshold = stepLength; // [m]
 
 struct Quaternion {
     double w, x, y, z;
@@ -279,17 +279,24 @@ class GlobalPlanner{
             return {xPos, yPos};
         }
 
-        bool checkForObstacle(const Node& node) {
-            int xMapCell = node.xPos / mapResolution + mapWidth/2;
-            int yMapCell = node.yPos / mapResolution + mapHeight/2;
+        int posToCell(double xPos, double yPos) (
+            int xMapCell = xPos / mapResolution + mapWidth/2;
+            int yMapCell = yPos / mapResolution + mapHeight/2;
+            return yMapCell*mapHeight + xMapCell; 
+        )
 
-            int mapDataIndex = yMapCell*mapHeight + xMapCell;
+        bool checkForObstacle(const Node& node) {
             
-            if (mapData[mapDataIndex] != 0){
-                return true;
-            } else {
-                return false;
+            // Create an area around the point that is also forbidden
+            for (double x = node.xPos - obstacleDistThreshold; x < node.xPos + obstacleDistThreshold; x += mapResolution){
+                for (double y = node.yPos - obstacleDistThreshold; y < node.yPos + obstacleDistThreshold; y += mapResolution){
+                    if (mapData[posToCell(x,y)] != 0){
+                        ROS_INFO_STREAM("Obstacle cell found");
+                        return true;
+                    }
+                }
             }
+            return false;
         }
 
         nav_msgs::Path createPathToGoal(const std::vector<Node>& Tree) {
@@ -311,10 +318,11 @@ class GlobalPlanner{
             
             for (int i = Tree.size() - 1; i >= 0; --i) {
                 Node node = Tree[i];
-                ROS_INFO_STREAM("Node id: " << node.id);
                 if(node.id != nodePrev.idParent) {
                     continue;
                 }
+                ROS_INFO_STREAM("Node id: " << node.id);
+
                 pose.position.x = node.xPos;
                 pose.position.y = node.yPos;
                 pose.position.z = 0;
@@ -324,8 +332,7 @@ class GlobalPlanner{
                 quat=quat.normalize();
 
                 ROS_INFO_STREAM("Node heading angle: " << node.headingAngle);
-                ROS_INFO_STREAM("Quaternion: x: " << quat.getX() << " y: " << quat.getY() << " z: " 
-                                 << quat.getZ() << " w: " << quat.getW());
+                ROS_INFO_STREAM("Node parent id: " << node.idParent);
 
                 pose.orientation.x = quat.getX();
                 pose.orientation.y = quat.getY();
