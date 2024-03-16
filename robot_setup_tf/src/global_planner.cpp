@@ -305,7 +305,7 @@ class GlobalPlanner{
             for (const Node& node : Tree) {
                 dist = calcDistance(node.xPos,node.yPos,xGoal,yGoal);
                 if (dist < closestDist) {
-                    nodePrev = node;
+                    nodePrev = &node;
                     closestDist = dist;
                 }
             }
