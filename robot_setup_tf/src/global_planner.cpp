@@ -121,8 +121,8 @@ class Node{
                 ROS_INFO_STREAM("New heading: " << headingAngle);
                 ROS_INFO_STREAM("Prev dx: " << dx);
                 ROS_INFO_STREAM("Prev dy: " << dy);
-                dx = cos(newHeading)*stepLength;
-                dy = sin(newHeading)*stepLength;
+                dx = cos(headingAngle)*stepLength;
+                dy = sin(headingAngle)*stepLength;
                 ROS_INFO_STREAM("New dx: " << dx);
                 ROS_INFO_STREAM("New dy: " << dy);
             }
