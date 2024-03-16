@@ -298,7 +298,7 @@ class GlobalPlanner{
             return false;
         }
 
-        nav_msgs::Path createPathToGoal(const std::vector<Node>& Tree) {
+        nav_msgs::Path createPathToGoal(const std::vector<Node>& Tree, bool goalFound) {
             
             ROS_INFO_STREAM("Goal node reached, creating path msg");
 
@@ -310,8 +310,23 @@ class GlobalPlanner{
             geometry_msgs::Pose pose;
             
             nav_msgs::Path path;
-
-            Node nodePrev = Tree.back();
+            
+            Node nodePrev;
+            if (goalFound) {
+                nodePrev = Tree.back();
+            } else {
+                Node closestNode;
+                double closestDist = 10000;
+                double dist;
+                for (const Node& node : Tree) {
+                    dist = calcDistance(node.xPos,node.yPos,xGoal,yGoal);
+                    if (dist < closestDist) {
+                        closestNode = node;
+                    }
+                }
+                nodePrev = closestNode;
+            }
+            
             ROS_INFO_STREAM("First node id: " << nodePrev.id);
             ROS_INFO_STREAM("First node parent id: " << nodePrev.idParent);
             
@@ -414,11 +429,11 @@ class GlobalPlanner{
                 
                 double headingDiffToGoal = calcHeadingDiff(newNode.headingAngle,goalHeading);
                 if (distToGoal < goalDistThreshold && abs(headingDiffToGoal) < maxAngleDiff) {
-                    path = createPathToGoal(Tree);
+                    path = createPathToGoal(Tree,true);
                     return path;
                 }
             }
-            path = createPathToGoal(Tree);
+            path = createPathToGoal(Tree,false);
             return path;
         }
 
