@@ -279,14 +279,13 @@ class GlobalPlanner{
             return {xPos, yPos};
         }
 
-        int posToCell(double xPos, double yPos) (
+        int posToCell(double xPos, double yPos) {
             int xMapCell = xPos / mapResolution + mapWidth/2;
             int yMapCell = yPos / mapResolution + mapHeight/2;
             return yMapCell*mapHeight + xMapCell; 
-        )
+        }
 
         bool checkForObstacle(const Node& node) {
-            
             // Create an area around the point that is also forbidden
             for (double x = node.xPos - obstacleDistThreshold; x < node.xPos + obstacleDistThreshold; x += mapResolution){
                 for (double y = node.yPos - obstacleDistThreshold; y < node.yPos + obstacleDistThreshold; y += mapResolution){
