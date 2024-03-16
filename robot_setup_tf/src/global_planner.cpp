@@ -18,7 +18,7 @@
 
 // TUNING PARAMETERS
 const double maxAngleDiff = 0.5;// M_PI/8; 
-const int goalBias = 1; // How often should the new node be set in goal
+const int goalBias = 5; // How often should the new node be set in goal
 const int maxIterationsRrt = 2000;
 const double stepLength = 0.1; // [m]
 const double goalDistThreshold = 3*stepLength; // [m]
