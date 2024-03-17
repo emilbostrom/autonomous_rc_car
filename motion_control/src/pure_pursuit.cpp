@@ -24,8 +24,8 @@ class PurePursuit
 
         PurePursuit():
             n{},
-            sub(n.subscribe("slam_out_pose", 1000, &PurePursuit::poseCallback, this)),
-            sub(n.subscribe("global_path", 1000, &PurePursuit::poseCallback, this)),
+            subPos(n.subscribe("slam_out_pose", 1000, &PurePursuit::poseCallback, this)),
+            subMap(n.subscribe("global_path", 1000, &PurePursuit::poseCallback, this)),
             timer(n.createTimer(ros::Duration(RATE), &PurePursuit::main_loop, this))
         {
         }
@@ -42,9 +42,9 @@ class PurePursuit
         }
 
         void pathCallback(const nav_msgs::Path::ConstPtr& pathMsg) {
-            for(const auto& poseMsg : pathMsg->poseMsgs) {
+            for(const auto& poseStampedMsg : pathMsg->poses) {
                 pathPoses.push_back(poseMsg->pose);
-                ROS_INFO_STREAM("path x : " << poseMsg->pose->position->x);
+                ROS_INFO_STREAM("path x : " << poseStampedMsg->pose->position->x);
             }
         }
 
@@ -75,7 +75,8 @@ class PurePursuit
     private:
         ros::NodeHandle n;
         ros::Publisher pub;
-        ros::Subscriber sub;
+        ros::Subscriber subMap;
+        ros::Subscriber subPos;
         ros::Timer timer;
 };
 
