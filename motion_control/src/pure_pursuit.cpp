@@ -30,7 +30,7 @@ class PurePursuit
         {
         }
 
-        void poseCallback(const geometry_msgs::PoseStamped& currentPosMsg) {
+        void poseCallback(const geometry_msgs::PoseStamped::ConstPtr& currentPosMsg) {
             xCurrent = currentPosMsg->pose.position.x;
             yCurrent = currentPosMsg->pose.position.y;
             xQuatCurrent = currentPosMsg->pose.orientation.x;
@@ -41,7 +41,7 @@ class PurePursuit
             ROS_INFO_STREAM("yCurrent: " << yCurrent);
         }
 
-        void pathCallback(const nav_msgs::Path& pathMsg) {
+        void pathCallback(const nav_msgs::Path::ConstPtr& pathMsg) {
             for(const auto& poseMsg : pathMsg->poseMsgs) {
                 pathPoses.push_back(poseMsg->pose);
                 ROS_INFO_STREAM("path x : " << poseMsg->pose->position->x);
@@ -64,7 +64,7 @@ class PurePursuit
 
         }
 
-        void main_loop(const ros::TimerEvent &) const
+        void main_loop(const ros::TimerEvent &)
         {
             findClosestPointToCar();
             findLookAheadPoint();
