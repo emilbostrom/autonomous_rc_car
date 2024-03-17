@@ -43,8 +43,8 @@ class PurePursuit
 
         void pathCallback(const nav_msgs::Path::ConstPtr& pathMsg) {
             for(const auto& poseStampedMsg : pathMsg->poses) {
-                pathPoses.push_back(poseMsg->pose);
-                ROS_INFO_STREAM("path x : " << poseStampedMsg->pose->position->x);
+                pathPoses.push_back(poseStampedMsg.pose);
+                ROS_INFO_STREAM("path x : " << poseStampedMsg.pose.position.x);
             }
         }
 
