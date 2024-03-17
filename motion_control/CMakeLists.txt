@@ -205,3 +205,7 @@ include_directories(
 
 ## Add folders to be run by python nosetests
 # catkin_add_nosetests(test)
+include_directories(include ${catkin_INCLUDE_DIRS})
+
+add_executable(pure_pursuit src/pure_pursuit.cpp)
+target_link_libraries(pure_pursuit ${catkin_LIBRARIES})
