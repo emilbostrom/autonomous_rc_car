@@ -25,21 +25,12 @@ const double goalDistThreshold = 3*stepLength; // [m]
 const double angleDiffThreshold = M_PI/4; // [rad]
 const double obstacleDistThreshold = stepLength; // [m]
 
-struct Quaternion {
-    double w, x, y, z;
-};
-
-struct EulerAngles {
-    double roll, pitch, yaw;
-};
-
 double calcDistance(double x1, double y1, double x2, double y2) {
     return sqrt(pow((x2-x1),2) + pow((y2-y1),2));
 }
 
 double calcHeadingDiff(double heading1, double heading2) {
     double headingDiff = heading1 - heading2;
-    
     while (headingDiff > M_PI) {
         headingDiff -= 2.0 * M_PI;
     } 
@@ -54,9 +45,7 @@ class Node{
         int id;
         int idParent;
         int cost;
-
         double headingAngle;
-
         double xPos;
         double yPos;
         
@@ -85,9 +74,7 @@ class Node{
         }
 
         std::tuple<double, double> checkDynamicConstraints(double dx, double dy, const Node& nodeParent){
-
             headingAngle = atan2(dy,dx);
-            
             ROS_INFO_STREAM("Node heading calc: " << headingAngle);
             double headingDiff = calcHeadingDiff(headingAngle,nodeParent.headingAngle);
         
@@ -110,43 +97,35 @@ class Node{
                 ROS_INFO_STREAM("New dx: " << dx);
                 ROS_INFO_STREAM("New dy: " << dy);
             }
-            
             return {dx,dy};
         }
 
         Node findNearestNode(const std::vector<Node>& Tree) {
             Node nearestNode = Tree[0];
-
             ROS_INFO_STREAM("Node " << id << " has position " << xPos << "," << yPos);
-
             double nearestDist = calcDistance(xPos,yPos,Tree[0].xPos,Tree[0].yPos);
-
             ROS_INFO_STREAM("Tree size: " << Tree.size());
 
+            double dist;
             for(int i = 1; i < Tree.size(); i++) {
-                double dist = calcDistance(xPos,yPos,Tree[i].xPos,Tree[i].yPos);
+                dist = calcDistance(xPos,yPos,Tree[i].xPos,Tree[i].yPos);
                 if (dist < nearestDist) {
                     nearestNode = Tree[i];
                     nearestDist = dist;
                 }
             }
-
             ROS_INFO_STREAM("Nearest node to " << id << " is " << nearestNode.id 
                             << "with distance: " << nearestDist);
 
             idParent = nearestNode.id;
-
             calcNewNodePos(nearestNode,nearestDist);
-
             return nearestNode;
         }
-
 };
 
 
 class GlobalPlanner{
     public:
-        
         // Map variables
         std::string frameIdMap = "map";
         double mapResolution; // [m/cell]
@@ -231,7 +210,6 @@ class GlobalPlanner{
                 }
                 mapMax = i;
             }
-            
             seed_val = 100;
             rng.seed(seed_val);
         }
@@ -241,15 +219,9 @@ class GlobalPlanner{
             int yCellMax = mapMax/mapHeight;
             int xCellMin = mapMin % mapWidth;
             int xCellMax = mapMax % mapWidth;
-            ROS_INFO_STREAM("mapMin: " << mapMin);
-            ROS_INFO_STREAM("mapMax: " << mapMax);
-            ROS_INFO_STREAM("yCellMin: " << yCellMin);
-            ROS_INFO_STREAM("yCellMax: " << yCellMax);
-            ROS_INFO_STREAM("xCellMin: " << xCellMin);
-            ROS_INFO_STREAM("xCellMax: " << xCellMax);
+
             std::uniform_int_distribution<uint32_t> widthGenerator(xCellMin, xCellMax);
             std::uniform_int_distribution<uint32_t> heightGenerator(yCellMin, yCellMax);
-
 
             int xCell = widthGenerator(rng);
             int yCell = heightGenerator(rng);
@@ -292,15 +264,29 @@ class GlobalPlanner{
             }
         }
 
-        nav_msgs::Path createPathToGoal(const std::vector<Node>& Tree, bool goalFound) {
+        void setPoseInformation(geometry_msgs::Pose& pose) {
+            pose.position.x = node.xPos;
+            pose.position.y = node.yPos;
+            pose.position.z = 0;
 
+            tf2::Quaternion quat;
+            quat.setRPY(0,0,node.headingAngle);
+            quat=quat.normalize();
+
+            ROS_INFO_STREAM("Node heading angle: " << node.headingAngle);
+            ROS_INFO_STREAM("Node parent id: " << node.idParent);
+
+            pose.orientation.x = quat.getX();
+            pose.orientation.y = quat.getY();
+            pose.orientation.z = quat.getZ();
+            pose.orientation.w = quat.getW();
+        }
+
+        nav_msgs::Path createPathToGoal(const std::vector<Node>& Tree, bool goalFound) {
             std::vector<geometry_msgs::PoseStamped> posesStampedVectorMsg;
-            
             geometry_msgs::PoseStamped poseStampedMsg;
             poseStampedMsg.header.frame_id = frameIdMap;
-            
             geometry_msgs::Pose pose;
-            
             nav_msgs::Path path;
             
             Node nodePrev =  Tree.back();
@@ -318,44 +304,23 @@ class GlobalPlanner{
                 }
                 ROS_INFO_STREAM("Node id: " << node.id);
 
-                pose.position.x = node.xPos;
-                pose.position.y = node.yPos;
-                pose.position.z = 0;
-
-                tf2::Quaternion quat;
-                quat.setRPY(0,0,node.headingAngle);
-                quat=quat.normalize();
-
-                ROS_INFO_STREAM("Node heading angle: " << node.headingAngle);
-                ROS_INFO_STREAM("Node parent id: " << node.idParent);
-
-                pose.orientation.x = quat.getX();
-                pose.orientation.y = quat.getY();
-                pose.orientation.z = quat.getZ();
-                pose.orientation.w = quat.getW();
-
+                setPoseInformation(pose);
                 poseStampedMsg.pose = pose;
-
                 posesStampedVectorMsg.push_back(poseStampedMsg);
 
                 nodePrev = node;
             }
-
             path.header.frame_id = frameIdMap;
             path.poses = posesStampedVectorMsg;
-
             return path;
         }
 
-        const nav_msgs::Path createPath(){
-
-            nav_msgs::Path path;
-
-            // Create first node, which is current position
+        Node createFirstNode(){
             int idOrigin = 0;
             Node nodeOrigin(xCurrent,yCurrent,idOrigin);
             nodeOrigin.idParent = 0;
             nodeOrigin.cost = 0;
+            
             tf2::Quaternion q(xQuatCurrent, yQuatCurrent, zQuatCurrent, wQuatCurrent);
             tf2::Matrix3x3 m(q);
             double roll, pitch, yaw;
@@ -363,16 +328,22 @@ class GlobalPlanner{
             nodeOrigin.headingAngle = yaw;
 
             ROS_INFO_STREAM("First node heading: " << nodeOrigin.headingAngle);
+            return nodeOrigin;
+        }
+
+        const nav_msgs::Path createPath(){
+            nav_msgs::Path path;
+            Node nodeOrigin = createFirstNode();
 
             // Create an array of all nodes
             std::vector<Node> Tree;
             Tree.push_back(nodeOrigin);
 
-             std::uniform_int_distribution<uint32_t> nodeIsGoalBias(0, 99);
-
-            double xPosNode, yPosNode, distToGoal;
+            std::uniform_int_distribution<uint32_t> nodeIsGoalBias(0, 99);
+            bool nodeInObstacle;
+            double xPosNode, yPosNode, distToGoal, headingDiffToGoal;
             for(int iRrt  = 1; iRrt < maxIterationsRrt; iRrt++) {
-                // Randomly set the new node in the goal position 
+                // Sometimes set the new node in the goal position 
                 if(nodeIsGoalBias(rng) < goalBias){
                     ROS_INFO_STREAM("Node is set to goal");
                     xPosNode = xGoal;
@@ -384,21 +355,20 @@ class GlobalPlanner{
                 Node newNode(xPosNode,yPosNode,iRrt);
                 Node parentNode = newNode.findNearestNode(Tree);
 
-                bool nodeInObstacle = checkForObstacle(newNode);
+                nodeInObstacle = checkForObstacle(newNode);
                 if (nodeInObstacle) {
                     ROS_INFO_STREAM("Node in obstacle, skipped");
                     continue;
                 }
  
-                // If both dynamic and obstacle checks pass add node to tree
+                // If obstacle checks pass add node to tree
                 Tree.push_back(newNode);
 
                 ROS_INFO_STREAM("Added new node to tree: " << newNode.id << " xPos: " 
                                  << newNode.xPos << " yPos: " << newNode.yPos);
                 
                 distToGoal = calcDistance(newNode.xPos,newNode.yPos,xGoal,yGoal);
-                
-                double headingDiffToGoal = calcHeadingDiff(newNode.headingAngle,goalHeading);
+                headingDiffToGoal = calcHeadingDiff(newNode.headingAngle,goalHeading);
                 if (distToGoal < goalDistThreshold && abs(headingDiffToGoal) < angleDiffThreshold) {
                     ROS_INFO_STREAM("Goal is found, calculating path");
                     path = createPathToGoal(Tree,true);
@@ -408,14 +378,12 @@ class GlobalPlanner{
             path = createPathToGoal(Tree,false);
             return path;
         }
-
 };
 
-
 int main(int argc, char** argv) {
-
     ros::init(argc,argv, "global_planner");
     ros::NodeHandle n;
+    ros::Rate r(10); // 10 hz
     
     boost::shared_ptr<geometry_msgs::PoseStamped const> iniPosMsg;
     iniPosMsg = ros::topic::waitForMessage<geometry_msgs::PoseStamped>("slam_out_pose",ros::Duration(2.0));
@@ -427,22 +395,13 @@ int main(int argc, char** argv) {
     goalPosMsg = ros::topic::waitForMessage<geometry_msgs::PoseStamped>("/move_base_simple/goal",ros::Duration(30.0));
 
     GlobalPlanner planner(iniPosMsg,mapDataMsg,goalPosMsg);
-
     ros::Publisher pub = n.advertise<nav_msgs::Path>("global_path",10);
-
-    ros::Rate r(10); // 10 hz
-
     nav_msgs::Path path = planner.createPath();
 
     while(ros::ok()) {
-
         pub.publish(path);
-
         ros::spinOnce();
         r.sleep();
     }
-
-    
     return 0;
-
 }
