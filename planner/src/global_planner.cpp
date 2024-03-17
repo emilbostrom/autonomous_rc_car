@@ -127,7 +127,7 @@ class Node{
 class GlobalPlanner{
     public:
         // Map variables
-        std::string frameIdMap = "map";
+        std::string frameIdMap;
         double mapResolution; // [m/cell]
         int mapWidth; // [cells]
         int mapHeight; // [cells]
@@ -155,20 +155,22 @@ class GlobalPlanner{
         std::mt19937 rng;
         uint32_t seed_val;
 
-        GlobalPlanner(const geometry_msgs::PoseStamped::ConstPtr& poseMsg, 
-                      const nav_msgs::OccupancyGrid::ConstPtr& mapMsg,
-                      const geometry_msgs::PoseStamped::ConstPtr& goalMsg) {
-            
-            xCurrent = poseMsg->pose.position.x;
-            yCurrent = poseMsg->pose.position.y;
-            xQuatCurrent = poseMsg->pose.orientation.x;
-            yQuatCurrent = poseMsg->pose.orientation.y;
-            zQuatCurrent = poseMsg->pose.orientation.z;
-            wQuatCurrent = poseMsg->pose.orientation.w;
+        GlobalPlanner() {
+            seed_val = 100;
+            rng.seed(seed_val);
+            frameIdMap = "map";
+        }
 
-            ROS_INFO_STREAM("xCurrent: " << xCurrent);
-            ROS_INFO_STREAM("yCurrent: " << yCurrent);
+        void poseCallback(const geometry_msgs::PoseStamped& currentPosMsg) {
+            xCurrent = currentPosMsg->pose.position.x;
+            yCurrent = currentPosMsg->pose.position.y;
+            xQuatCurrent = currentPosMsg->pose.orientation.x;
+            yQuatCurrent = currentPosMsg->pose.orientation.y;
+            zQuatCurrent = currentPosMsg->pose.orientation.z;
+            wQuatCurrent = currentPosMsg->pose.orientation.w;
+        }
 
+        void goalCallback(const geometry_msgs::PoseStamped& goalMsg) {
             xGoal = goalMsg->pose.position.x;
             yGoal = goalMsg->pose.position.y;
             x_quat_goal = goalMsg->pose.orientation.x;
@@ -176,7 +178,6 @@ class GlobalPlanner{
             z_quat_goal = goalMsg->pose.orientation.z;
             w_quat_goal = goalMsg->pose.orientation.w;
 
-            //Quaternion quatGoal = {x_quat_goal, y_quat_goal, z_quat_goal, w_quat_goal};
             tf2::Quaternion q(x_quat_goal, y_quat_goal, z_quat_goal, w_quat_goal);
             tf2::Matrix3x3 m(q);
             double rollGoal, pitchGoal, yawGoal;
@@ -185,7 +186,9 @@ class GlobalPlanner{
             ROS_INFO_STREAM("xGoal: " << xGoal);
             ROS_INFO_STREAM("yGoal: " << yGoal);
             ROS_INFO_STREAM("goalHeading:" << goalHeading);
+        }
 
+        void mapCallback(const nav_msgs::OccupancyGrid::ConstPtr& mapMsg) {
             mapResolution = mapMsg->info.resolution;
             mapWidth = mapMsg->info.width;
             mapHeight = mapMsg->info.height;
@@ -206,8 +209,6 @@ class GlobalPlanner{
                 }
                 mapMax = i;
             }
-            seed_val = 100;
-            rng.seed(seed_val);
         }
 
         std::tuple<double, double> randomPos() {
@@ -380,17 +381,21 @@ int main(int argc, char** argv) {
     ros::init(argc,argv, "global_planner");
     ros::NodeHandle n;
     ros::Rate r(1); // 1 hz
-    
+
+    GlobalPlanner planner();
+
     boost::shared_ptr<geometry_msgs::PoseStamped const> iniPosMsg;
     iniPosMsg = ros::topic::waitForMessage<geometry_msgs::PoseStamped>("slam_out_pose",ros::Duration(2.0));
-
+    planner.poseCallback(iniPosMsg);
+    
     boost::shared_ptr<nav_msgs::OccupancyGrid const> mapDataMsg;
     mapDataMsg = ros::topic::waitForMessage<nav_msgs::OccupancyGrid>("map",ros::Duration(2.0));
+    planner.mapCallback(mapDataMsg);
 
     boost::shared_ptr<geometry_msgs::PoseStamped const> goalPosMsg;
     goalPosMsg = ros::topic::waitForMessage<geometry_msgs::PoseStamped>("/move_base_simple/goal",ros::Duration(30.0));
-
-    GlobalPlanner planner(iniPosMsg,mapDataMsg,goalPosMsg);
+    planner.goalCallback(goalPosMsg);
+    
     ros::Publisher pub = n.advertise<nav_msgs::Path>("global_path",10);
     nav_msgs::Path path = planner.createPath();
 
