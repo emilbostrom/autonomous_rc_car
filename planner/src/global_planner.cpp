@@ -137,7 +137,6 @@ class GlobalPlanner{
         // Current pose variables
         double xCurrent;
         double yCurrent;
-        double zCurrent;
         double xQuatCurrent;
         double yQuatCurrent;
         double zQuatCurrent;
@@ -146,7 +145,6 @@ class GlobalPlanner{
         // Goal variables
         double xGoal;
         double yGoal;
-        double z_goal;
         double x_quat_goal;
         double y_quat_goal;
         double z_quat_goal;
@@ -163,7 +161,6 @@ class GlobalPlanner{
             
             xCurrent = poseMsg->pose.position.x;
             yCurrent = poseMsg->pose.position.y;
-            zCurrent = poseMsg->pose.position.z;
             xQuatCurrent = poseMsg->pose.orientation.x;
             yQuatCurrent = poseMsg->pose.orientation.y;
             zQuatCurrent = poseMsg->pose.orientation.z;
@@ -174,7 +171,6 @@ class GlobalPlanner{
 
             xGoal = goalMsg->pose.position.x;
             yGoal = goalMsg->pose.position.y;
-            z_goal = goalMsg->pose.position.z;
             x_quat_goal = goalMsg->pose.orientation.x;
             y_quat_goal = goalMsg->pose.orientation.y;
             z_quat_goal = goalMsg->pose.orientation.z;
@@ -264,7 +260,7 @@ class GlobalPlanner{
             }
         }
 
-        void setPoseInformation(geometry_msgs::Pose& pose) {
+        void setPoseInformation(const Node& node, geometry_msgs::Pose& pose) {
             pose.position.x = node.xPos;
             pose.position.y = node.yPos;
             pose.position.z = 0;
@@ -304,7 +300,7 @@ class GlobalPlanner{
                 }
                 ROS_INFO_STREAM("Node id: " << node.id);
 
-                setPoseInformation(pose);
+                setPoseInformation(node,pose);
                 poseStampedMsg.pose = pose;
                 posesStampedVectorMsg.push_back(poseStampedMsg);
 
@@ -383,7 +379,7 @@ class GlobalPlanner{
 int main(int argc, char** argv) {
     ros::init(argc,argv, "global_planner");
     ros::NodeHandle n;
-    ros::Rate r(10); // 10 hz
+    ros::Rate r(1); // 1 hz
     
     boost::shared_ptr<geometry_msgs::PoseStamped const> iniPosMsg;
     iniPosMsg = ros::topic::waitForMessage<geometry_msgs::PoseStamped>("slam_out_pose",ros::Duration(2.0));
