@@ -161,7 +161,7 @@ class GlobalPlanner{
             frameIdMap = "map";
         }
 
-        void poseCallback(const geometry_msgs::PoseStamped& currentPosMsg) {
+        void poseCallback(const geometry_msgs::PoseStamped::ConstPtr& currentPosMsg) {
             xCurrent = currentPosMsg->pose.position.x;
             yCurrent = currentPosMsg->pose.position.y;
             xQuatCurrent = currentPosMsg->pose.orientation.x;
@@ -170,7 +170,7 @@ class GlobalPlanner{
             wQuatCurrent = currentPosMsg->pose.orientation.w;
         }
 
-        void goalCallback(const geometry_msgs::PoseStamped& goalMsg) {
+        void goalCallback(const geometry_msgs::PoseStamped::ConstPtr& goalMsg) {
             xGoal = goalMsg->pose.position.x;
             yGoal = goalMsg->pose.position.y;
             x_quat_goal = goalMsg->pose.orientation.x;
