@@ -14,8 +14,8 @@ class PurePursuit
 {
     public:
         // Tuning parameters
-        const lookAheadDistance = 0.5; // [m]
-        const RATE = 0.1; // [s] 1/RATE = Hz
+        const double lookAheadDistance = 0.5; // [m]
+        const double RATE = 0.1; // [s] 1/RATE = Hz
 
         double xCurrent, yCurrent;
         double xQuatCurrent,yQuatCurrent,zQuatCurrent,wQuatCurrent;        
@@ -26,7 +26,7 @@ class PurePursuit
             n{},
             sub(n.subscribe("slam_out_pose", 1000, &PurePursuit::poseCallback, this)),
             sub(n.subscribe("global_path", 1000, &PurePursuit::poseCallback, this)),
-            timer(n.createTimer(ros::Duration(RATE), &PurePursuit::main_loop, this)),
+            timer(n.createTimer(ros::Duration(RATE), &PurePursuit::main_loop, this))
         {
         }
 
