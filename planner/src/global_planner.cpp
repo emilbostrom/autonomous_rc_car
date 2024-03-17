@@ -382,7 +382,7 @@ int main(int argc, char** argv) {
     ros::NodeHandle n;
     ros::Rate r(1); // 1 hz
 
-    GlobalPlanner planner();
+    GlobalPlanner planner;
 
     boost::shared_ptr<geometry_msgs::PoseStamped const> iniPosMsg;
     iniPosMsg = ros::topic::waitForMessage<geometry_msgs::PoseStamped>("slam_out_pose",ros::Duration(2.0));
