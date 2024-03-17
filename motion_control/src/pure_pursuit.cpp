@@ -10,7 +10,7 @@
 #include <nav_msgs/Path.h>
 #include <geometry_msgs/PoseStamped.h>
 
-class PurePursuit()
+class PurePursuit
 {
     public:
         // Tuning parameters
