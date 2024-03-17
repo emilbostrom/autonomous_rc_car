@@ -1,8 +1,8 @@
 <?xml version="1.0"?>
 <package format="2">
-  <name>robot_setup_tf</name>
+  <name>planner</name>
   <version>0.0.0</version>
-  <description>The robot_setup_tf package</description>
+  <description>The planner package</description>
 
   <!-- One maintainer tag required, multiple allowed, one person per tag -->
   <!-- Example:  -->
@@ -14,12 +14,6 @@
   <!-- Commonly used license strings: -->
   <!--   BSD, MIT, Boost Software License, GPLv2, GPLv3, LGPLv2.1, LGPLv3 -->
   <license>TODO</license>
-
-
-  <!-- Url tags are optional, but multiple are allowed, one per tag -->
-  <!-- Optional attribute type can be: website, bugtracker, or repository -->
-  <!-- Example: -->
-  <!-- <url type="website">http://wiki.ros.org/robot_setup_tf</url> -->
 
 
   <!-- Author tags are optional, multiple are allowed, one per tag -->
@@ -50,12 +44,15 @@
   <!--   <doc_depend>doxygen</doc_depend> -->
   <buildtool_depend>catkin</buildtool_depend>
   <build_depend>geometry_msgs</build_depend>
+  <build_depend>nav_msgs</build_depend>
   <build_depend>roscpp</build_depend>
   <build_depend>tf</build_depend>
   <build_export_depend>geometry_msgs</build_export_depend>
+  <build_export_depend>nav_msgs</build_export_depend>
   <build_export_depend>roscpp</build_export_depend>
   <build_export_depend>tf</build_export_depend>
   <exec_depend>geometry_msgs</exec_depend>
+  <exec_depend>nav_msgs</exec_depend>
   <exec_depend>roscpp</exec_depend>
   <exec_depend>tf</exec_depend>
 

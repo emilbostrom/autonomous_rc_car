@@ -9,6 +9,7 @@ project(robot_setup_tf)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS
   geometry_msgs
+  nav_msgs
   roscpp
   tf
 )
