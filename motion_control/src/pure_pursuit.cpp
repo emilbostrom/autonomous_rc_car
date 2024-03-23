@@ -87,6 +87,7 @@ class PurePursuit
                 dist = calcDistance(pathPoses[i].position.x,pathPoses[i].position.y,
                                     xCurrent, yCurrent
                 );
+                ROS_INFO_STREAM("Dist to point " << i << " on path is: " << dist);
                 if (dist < closestDist){
                     closestPoint = i;
                     closestDist = dist;
@@ -100,6 +101,7 @@ class PurePursuit
             for(int i = 0; pathPoses.size(); i++) {
                 dist = calcDistance(pathPoses[i].position.x,pathPoses[i].position.y, 
                                     pathPoses[closestPoint].position.x,pathPoses[closestPoint].position.y);
+                ROS_INFO_STREAM("Dist to point " << i " from closest point " << closestPoint << " is: " << dist);
                 if (abs(dist-lookAheadDistance) < closestDist){
                     lookAheadPoint = i;
                     closestDist = abs(dist-lookAheadDistance);
