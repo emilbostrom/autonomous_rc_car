@@ -132,7 +132,7 @@ class PurePursuit
             std::string steeringString = std::to_string(steeringCommand);
             std::string steeringMessage = "S" + steeringString;
             const char* steeringMessagePtr = steeringMessage.c_str();
-            write(serial_port, steeringMessagePtr, strlen(steeringMessagePtr));
+            //write(serial_port, steeringMessagePtr, strlen(steeringMessagePtr));
             ROS_INFO_STREAM("Message sent: " << steeringMessage);
         }
 
@@ -171,6 +171,6 @@ int main(int argc, char** argv){
     ros::init(argc,argv, "pure_pursuit");
     PurePursuit controller;
     ros::spin();
-    close(serial_port);
+    //close(serial_port);
     return 0;
 }
