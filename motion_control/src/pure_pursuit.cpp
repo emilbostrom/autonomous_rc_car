@@ -53,6 +53,7 @@ class PurePursuit
             subPath(n.subscribe("global_path", 1000, &PurePursuit::pathCallback, this)),
             timer(n.createTimer(ros::Duration(RATE), &PurePursuit::main_loop, this))
         {
+            ROS_INFO_STREAM("Initialize pure pursuit");
         }
 
         void poseCallback(const geometry_msgs::PoseStamped::ConstPtr& currentPosMsg) {
