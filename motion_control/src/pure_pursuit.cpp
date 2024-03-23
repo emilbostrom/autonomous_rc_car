@@ -85,7 +85,7 @@ class PurePursuit
             double dist;
             double closestDist = 1000000; // Large starting value
             ROS_INFO_STREAM("Path size: " << pathPoses.size());
-            for(int i = 0; pathPoses.size(); i++) {
+            for(int i = 0; i < pathPoses.size(); i++) {
                 dist = calcDistance(pathPoses[i].position.x,pathPoses[i].position.y,
                                     xCurrent, yCurrent
                 );
@@ -100,7 +100,7 @@ class PurePursuit
         void findLookAheadPoint(){
             double dist;
             double closestDist = 1000000; // Large starting value
-            for(int i = 0; pathPoses.size(); i++) {
+            for(int i = 0; i < pathPoses.size(); i++) {
                 dist = calcDistance(pathPoses[i].position.x,pathPoses[i].position.y, 
                                     pathPoses[closestPoint].position.x,pathPoses[closestPoint].position.y);
                 ROS_INFO_STREAM("Dist to point " << i << " from closest point " << closestPoint << " is: " << dist);
