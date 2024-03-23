@@ -69,8 +69,8 @@ class PurePursuit
             );
             tf2::Matrix3x3 m(q);
             m.getRPY(dummyRoll,dummyPitch,currentHeading);
-            ROS_INFO_STREAM("xCurrent: " << xCurrent);
-            ROS_INFO_STREAM("yCurrent: " << yCurrent);
+            // ROS_INFO_STREAM("xCurrent: " << xCurrent);
+            // ROS_INFO_STREAM("yCurrent: " << yCurrent);
         }
 
         void pathCallback(const nav_msgs::Path::ConstPtr& pathMsg) {
@@ -130,6 +130,7 @@ class PurePursuit
             std::string steeringMessage = "S" + steeringString;
             const char* steeringMessagePtr = steeringMessage.c_str();
             write(serial_port, steeringMessagePtr, strlen(steeringMessagePtr));
+            ROS_INFO_STREAM("Message pointer: " << *steeringMessagePtr);
             ROS_INFO_STREAM("Message sent: " << steeringMessage);
         }
 
