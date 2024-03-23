@@ -21,7 +21,8 @@
 #include <tf2/LinearMath/Matrix3x3.h>
 
 // Serial port
-int serial_port = open("/dev/ttyUSB1", O_RDWR);
+int serial_port;
+const char* serial_name = open("/dev/ttyUSB1", O_RDWR);
 
 // Tuning constants
 int MAX_STEERING_ANGLE = 1; // [rad]
@@ -156,15 +157,39 @@ class PurePursuit
 
 void configureSerialPort(){
     std::cout << "Configuring serial port";
+    
+    serial_port = open(serial_name, O_RDWR | O_NOCTTY | O_SYNC);
+    if (serial_port < 0) {
+        std::cerr << "Error opening " << portname << "\n";
+        return;
+    }
+    
     struct termios tty;
     memset(&tty, 0, sizeof(tty));
-    if (serial_port < 0) {
-        std::cout << "Error from open";
-    }
     if(tcgetattr(serial_port, &tty) != 0) {
-        std::cout << "Error from tcgetattr";
+        std::cerr << "Error from tcgetattr\n";
+        return;
     }
-    cfsetospeed(&tty, B115200);
+
+    cfsetospeed(&tty, B115200); // Set baud rate
+    tty.c_cflag &= ~PARENB; // No parity
+    tty.c_cflag &= ~CSTOPB; // One stop bit
+    tty.c_cflag &= ~CSIZE;
+    tty.c_cflag |= CS8; // 8 bits per byte
+    tty.c_cflag &= ~CRTSCTS; // Disable hardware flow control
+
+    // Set input mode (non-canonical, no echo,...)
+    tty.c_lflag &= ~(ICANON | ECHO | ECHOE | ISIG);
+
+    // Set output mode (raw output)
+    tty.c_oflag &= ~OPOST;
+
+    // Set the new attributes
+    if (tcsetattr(serial_port, TCSANOW, &tty) != 0) {
+        std::cerr << "Error from tcsetattr\n";
+        return;
+    }
+    std::cout << "Serial port configured successfully.\n";
 }
 
 int main(int argc, char** argv){
