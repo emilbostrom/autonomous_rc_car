@@ -154,6 +154,7 @@ class PurePursuit
 };
 
 void configureSerialPort(){
+    std::cout << "Configuring serial port";
     struct termios tty;
     memset(&tty, 0, sizeof(tty));
     if (serial_port < 0) {
