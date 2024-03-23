@@ -21,7 +21,7 @@
 #include <tf2/LinearMath/Matrix3x3.h>
 
 // Serial port
-int serial_port = open("/dev/ttyUSB1", O_RDWR);
+// int serial_port = open("/dev/ttyUSB1", O_RDWR);
 
 // Tuning constants
 int MAX_STEERING_ANGLE = 1; // [rad]
