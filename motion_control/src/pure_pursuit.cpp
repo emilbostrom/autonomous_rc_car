@@ -22,7 +22,7 @@
 
 // Serial port
 int serial_port;
-const char* serial_name = open("/dev/ttyUSB1", O_RDWR);
+const char* serial_name = "/dev/ttyUSB1";
 
 // Tuning constants
 int MAX_STEERING_ANGLE = 1; // [rad]
@@ -160,7 +160,7 @@ void configureSerialPort(){
     
     serial_port = open(serial_name, O_RDWR | O_NOCTTY | O_SYNC);
     if (serial_port < 0) {
-        std::cerr << "Error opening " << portname << "\n";
+        std::cerr << "Error opening " << serial_name << "\n";
         return;
     }
     
