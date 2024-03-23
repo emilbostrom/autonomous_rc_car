@@ -22,8 +22,6 @@
 
 // Serial port
 int serial_port = open("/dev/ttyUSB1", O_RDWR);
-struct termios tty;
-memset(&tty, 0, sizeof(tty));
 
 // Tuning constants
 int MAX_STEERING_ANGLE = 1; // [rad]
@@ -154,11 +152,13 @@ class PurePursuit
 };
 
 void configureSerialPort(){
+    struct termios tty;
+    memset(&tty, 0, sizeof(tty));
     if (serial_port < 0) {
-        fprintf("Error %i from open: %s\n", errno, strerror(errno));
+        fprintf("Error from open");
     }
     if(tcgetattr(serial_port, &tty) != 0) {
-        fprintf("Error %i from tcgetattr: %s\n", errno, strerror(errno));
+        fprintf("Error from tcgetattr");
     }
     cfsetospeed(&tty, B115200);
 }
