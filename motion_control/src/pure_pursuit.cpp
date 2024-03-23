@@ -141,11 +141,14 @@ class PurePursuit
         void main_loop(const ros::TimerEvent &)
         {
             ROS_INFO_STREAM("A loop");
-            findClosestPointToCar();
-            findLookAheadPoint();
-            transformPointToVehicleCoordSys();
-            calcSteeringAngle();
-            sendsteeringCommand();
+            if (pathPoses.size() != 0){
+                findClosestPointToCar();
+                findLookAheadPoint();
+                transformPointToVehicleCoordSys();
+                calcSteeringAngle();
+                sendsteeringCommand();
+            }
+            
         }
 
     private:
