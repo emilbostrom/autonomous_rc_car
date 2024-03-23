@@ -12,6 +12,7 @@
 #include <errno.h> // Error integer and strerror() function
 #include <termios.h> // Contains POSIX terminal control definitions
 #include <unistd.h> // write(), read(), close()
+#include <string.h>
 
 #include <ros/ros.h>
 #include <nav_msgs/Path.h>
@@ -154,10 +155,10 @@ class PurePursuit
 
 void configureSerialPort(){
     if (serial_port < 0) {
-        ROS_INFO_STREAM("Error %i from open: %s\n", errno, strerror(errno));
+        fprintf("Error %i from open: %s\n", errno, strerror(errno));
     }
     if(tcgetattr(serial_port, &tty) != 0) {
-        ROS_INFO_STREAM("Error %i from tcgetattr: %s\n", errno, strerror(errno));
+        fprintf("Error %i from tcgetattr: %s\n", errno, strerror(errno));
     }
     cfsetospeed(&tty, B115200);
 }
