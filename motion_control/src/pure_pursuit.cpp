@@ -129,8 +129,8 @@ class PurePursuit
             std::string steeringString = std::to_string(steeringCommand);
             std::string steeringMessage = "S" + steeringString;
             // const char* steeringMessagePtr = steeringMessage.c_str();
-            write(serial_port, steeringMessage.c_str(), strlen(steeringMessage.c_str()));
-            ROS_INFO_STREAM("Message c_str: " << *steeringMessage.c_str());
+            write(serial_port, steeringMessage.c_str(), steeringMessage.length());
+            ROS_INFO_STREAM("Message c_str: " << steeringMessage.c_str());
             ROS_INFO_STREAM("Message sent: " << steeringMessage);
         }
 
