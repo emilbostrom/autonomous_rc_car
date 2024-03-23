@@ -153,7 +153,7 @@ class PurePursuit
         ros::Timer timer;
 };
 
-void configureSerialPort(){
+/*void configureSerialPort(){
     std::cout << "Configuring serial port";
     struct termios tty;
     memset(&tty, 0, sizeof(tty));
@@ -164,7 +164,7 @@ void configureSerialPort(){
         std::cout << "Error from tcgetattr";
     }
     cfsetospeed(&tty, B115200);
-}
+}*/
 
 int main(int argc, char** argv){
     //configureSerialPort();
