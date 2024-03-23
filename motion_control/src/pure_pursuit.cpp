@@ -53,7 +53,6 @@ class PurePursuit
             subPath(n.subscribe("global_path", 1000, &PurePursuit::pathCallback, this)),
             timer(n.createTimer(ros::Duration(RATE), &PurePursuit::main_loop, this))
         {
-            ROS_INFO_STREAM("Initialize pure pursuit");
         }
 
         void poseCallback(const geometry_msgs::PoseStamped::ConstPtr& currentPosMsg) {
@@ -75,7 +74,6 @@ class PurePursuit
         }
 
         void pathCallback(const nav_msgs::Path::ConstPtr& pathMsg) {
-            ROS_INFO_STREAM("pathMsg" << pathMsg);
             for(const auto& poseStampedMsg : pathMsg->poses) {
                 pathPoses.push_back(poseStampedMsg.pose);
             }
@@ -84,12 +82,10 @@ class PurePursuit
         void findClosestPointToCar(){
             double dist;
             double closestDist = 1000000; // Large starting value
-            ROS_INFO_STREAM("Path size: " << pathPoses.size());
             for(int i = 0; i < pathPoses.size(); i++) {
                 dist = calcDistance(pathPoses[i].position.x,pathPoses[i].position.y,
                                     xCurrent, yCurrent
                 );
-                ROS_INFO_STREAM("Dist to point " << i << " on path is: " << dist);
                 if (dist < closestDist){
                     closestPoint = i;
                     closestDist = dist;
@@ -103,7 +99,6 @@ class PurePursuit
             for(int i = 0; i < pathPoses.size(); i++) {
                 dist = calcDistance(pathPoses[i].position.x,pathPoses[i].position.y, 
                                     pathPoses[closestPoint].position.x,pathPoses[closestPoint].position.y);
-                ROS_INFO_STREAM("Dist to point " << i << " from closest point " << closestPoint << " is: " << dist);
                 if (abs(dist-lookAheadDistance) < closestDist){
                     lookAheadPoint = i;
                     closestDist = abs(dist-lookAheadDistance);
@@ -140,7 +135,6 @@ class PurePursuit
 
         void main_loop(const ros::TimerEvent &)
         {
-            ROS_INFO_STREAM("A loop");
             if (pathPoses.size() != 0){
                 findClosestPointToCar();
                 findLookAheadPoint();
