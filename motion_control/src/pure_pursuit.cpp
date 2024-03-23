@@ -167,7 +167,7 @@ void configureSerialPort(){
 }
 
 int main(int argc, char** argv){
-    configureSerialPort();
+    //configureSerialPort();
     ros::init(argc,argv, "pure_pursuit");
     PurePursuit controller;
     ros::spin();
