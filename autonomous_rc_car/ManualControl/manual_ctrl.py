@@ -13,7 +13,7 @@ try:
     with Xbox360Controller(0, axis_threshold=0.2) as controller:
         controller.info()
         
-        ser = serial.Serial('/dev/ttyUSB0')  # open serial port
+        ser = serial.Serial('/dev/ttyUSB1')  # open serial port
         ser.baudrate = 115200
         
         while True:
