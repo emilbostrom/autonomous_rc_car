@@ -155,10 +155,10 @@ void configureSerialPort(){
     struct termios tty;
     memset(&tty, 0, sizeof(tty));
     if (serial_port < 0) {
-        cout << "Error from open";
+        std::cout << "Error from open";
     }
     if(tcgetattr(serial_port, &tty) != 0) {
-        cout << "Error from tcgetattr";
+        std::cout << "Error from tcgetattr";
     }
     cfsetospeed(&tty, B115200);
 }
