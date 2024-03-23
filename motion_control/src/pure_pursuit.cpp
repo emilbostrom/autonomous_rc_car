@@ -21,7 +21,7 @@
 #include <tf2/LinearMath/Matrix3x3.h>
 
 // Serial port
-// int serial_port = open("/dev/ttyUSB1", O_RDWR);
+int serial_port = open("/dev/ttyUSB1", O_RDWR);
 
 // Tuning constants
 int MAX_STEERING_ANGLE = 1; // [rad]
@@ -133,7 +133,7 @@ class PurePursuit
             std::string steeringString = std::to_string(steeringCommand);
             std::string steeringMessage = "S" + steeringString;
             const char* steeringMessagePtr = steeringMessage.c_str();
-            //write(serial_port, steeringMessagePtr, strlen(steeringMessagePtr));
+            write(serial_port, steeringMessagePtr, strlen(steeringMessagePtr));
             ROS_INFO_STREAM("Message sent: " << steeringMessage);
         }
 
@@ -154,7 +154,7 @@ class PurePursuit
         ros::Timer timer;
 };
 
-/*void configureSerialPort(){
+void configureSerialPort(){
     std::cout << "Configuring serial port";
     struct termios tty;
     memset(&tty, 0, sizeof(tty));
@@ -165,13 +165,13 @@ class PurePursuit
         std::cout << "Error from tcgetattr";
     }
     cfsetospeed(&tty, B115200);
-}*/
+}
 
 int main(int argc, char** argv){
-    //configureSerialPort();
+    configureSerialPort();
     ros::init(argc,argv, "pure_pursuit");
     PurePursuit controller;
     ros::spin();
-    //close(serial_port);
+    close(serial_port);
     return 0;
 }
