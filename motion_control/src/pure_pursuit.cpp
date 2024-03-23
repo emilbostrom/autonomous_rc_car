@@ -6,6 +6,7 @@
 #include <iostream>
 #include <algorithm>
 #include <cmath>
+#include <cstring>
 
 #include <fcntl.h> // Contains file controls like O_RDWR
 #include <errno.h> // Error integer and strerror() function
@@ -19,12 +20,12 @@
 #include <tf2/LinearMath/Matrix3x3.h>
 
 // Serial port
-int serial_port = open("/dev/ttyUSB0", O_RDWR);
+int serial_port = open("/dev/ttyUSB1", O_RDWR);
 struct termios tty;
 memset(&tty, 0, sizeof(tty));
 
 // Tuning constants
-int MAX_STEERING_ANGLE = 1 // [rad]
+int MAX_STEERING_ANGLE = 1; // [rad]
 
 double calcDistance(double x1, double y1, double x2, double y2) {
     return sqrt(pow((x2-x1),2) + pow((y2-y1),2));
@@ -38,6 +39,7 @@ class PurePursuit
         const double RATE = 0.1; // [s] 1/RATE = Hz
 
         double xCurrent, yCurrent;
+        double xQuatCurrent, yQuatCurrent, zQuatCurrent, wQuatCurrent;
         double currentHeading, dummyRoll, dummyPitch;   
 
         int closestPoint, lookAheadPoint;
@@ -83,7 +85,7 @@ class PurePursuit
             double dist;
             double closestDist = 1000000; // Large starting value
             for(int i = 0; pathPoses.size(); i++) {
-                dist = calcDistance(pathPoses[i].pose.position.x,pathPoses[i].pose.position.y,
+                dist = calcDistance(pathPoses[i].position.x,pathPoses[i].position.y,
                                     xCurrent, yCurrent
                 );
                 if (dist < closestDist){
@@ -94,10 +96,11 @@ class PurePursuit
         }
 
         void findLookAheadPoint(){
+            double dist;
             double closestDist = 1000000; // Large starting value
             for(int i = 0; pathPoses.size(); i++) {
-                dist = calcDistance(pathPoses[i].pose.position.x,pathPoses[i].pose.position.y,
-                                    pathPoses[closestPoint].pose.position.x,pathPoses[closestPoint].pose.position.y);
+                dist = calcDistance(pathPoses[i].position.x,pathPoses[i].position.y, 
+                                    pathPoses[closestPoint].position.x,pathPoses[closestPoint].position.y);
                 if (abs(dist-lookAheadDistance) < closestDist){
                     lookAheadPoint = i;
                     closestDist = abs(dist-lookAheadDistance);
@@ -107,7 +110,8 @@ class PurePursuit
 
         void transformPointToVehicleCoordSys(){
             // y'= -*sin(theta)*x + cos(theta)*y
-            deltaY = -sin(currentHeading)*pathPoses[i].pose.position.x + cos(currentHeading)*pathPoses[i].pose.position.y;
+            deltaY = -sin(currentHeading)*pathPoses[lookAheadPoint].position.x + 
+                    cos(currentHeading)*pathPoses[lookAheadPoint].position.y;
         }
 
         void setSteeringCommand(){
@@ -150,16 +154,16 @@ class PurePursuit
 
 void configureSerialPort(){
     if (serial_port < 0) {
-        ROS_STREAM_INFO("Error %i from open: %s\n", errno, strerror(errno));
+        ROS_INFO_STREAM("Error %i from open: %s\n", errno, strerror(errno));
     }
     if(tcgetattr(serial_port, &tty) != 0) {
-        ROS_STREAM_INFO("Error %i from tcgetattr: %s\n", errno, strerror(errno));
+        ROS_INFO_STREAM("Error %i from tcgetattr: %s\n", errno, strerror(errno));
     }
     cfsetospeed(&tty, B115200);
 }
 
 int main(int argc, char** argv){
-    configureSerialPort()
+    configureSerialPort();
     ros::init(argc,argv, "pure_pursuit");
     PurePursuit controller;
     ros::spin();
