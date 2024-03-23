@@ -4,11 +4,31 @@
 #include <vector>
 #include <string>
 #include <iostream>
-#include <algorithm> 
+#include <algorithm>
+#include <cmath>
+
+#include <fcntl.h> // Contains file controls like O_RDWR
+#include <errno.h> // Error integer and strerror() function
+#include <termios.h> // Contains POSIX terminal control definitions
+#include <unistd.h> // write(), read(), close()
 
 #include <ros/ros.h>
 #include <nav_msgs/Path.h>
 #include <geometry_msgs/PoseStamped.h>
+#include <tf2/LinearMath/Quaternion.h>
+#include <tf2/LinearMath/Matrix3x3.h>
+
+// Serial port
+int serial_port = open("/dev/ttyUSB0", O_RDWR);
+struct termios tty;
+memset(&tty, 0, sizeof(tty));
+
+// Tuning constants
+int MAX_STEERING_ANGLE = 1 // [rad]
+
+double calcDistance(double x1, double y1, double x2, double y2) {
+    return sqrt(pow((x2-x1),2) + pow((y2-y1),2));
+}
 
 class PurePursuit
 {
@@ -18,7 +38,11 @@ class PurePursuit
         const double RATE = 0.1; // [s] 1/RATE = Hz
 
         double xCurrent, yCurrent;
-        double xQuatCurrent,yQuatCurrent,zQuatCurrent,wQuatCurrent;        
+        double currentHeading, dummyRoll, dummyPitch;   
+
+        int closestPoint, lookAheadPoint;
+        double deltaY;
+        double steeringAngle, steeringCommand;
 
         std::vector<geometry_msgs::Pose> pathPoses;
 
@@ -37,6 +61,13 @@ class PurePursuit
             yQuatCurrent = currentPosMsg->pose.orientation.y;
             zQuatCurrent = currentPosMsg->pose.orientation.z;
             wQuatCurrent = currentPosMsg->pose.orientation.w;
+            tf2::Quaternion q(currentPosMsg->pose.orientation.x, 
+                            currentPosMsg->pose.orientation.y, 
+                            currentPosMsg->pose.orientation.z, 
+                            currentPosMsg->pose.orientation.w
+            );
+            tf2::Matrix3x3 m(q);
+            m.getRPY(dummyRoll,dummyPitch,currentHeading);
             ROS_INFO_STREAM("xCurrent: " << xCurrent);
             ROS_INFO_STREAM("yCurrent: " << yCurrent);
         }
@@ -45,24 +76,59 @@ class PurePursuit
             ROS_INFO_STREAM("pathMsg" << pathMsg);
             for(const auto& poseStampedMsg : pathMsg->poses) {
                 pathPoses.push_back(poseStampedMsg.pose);
-                ROS_INFO_STREAM("path x : " << poseStampedMsg.pose.position.x);
             }
         }
 
         void findClosestPointToCar(){
-
+            double dist;
+            double closestDist = 1000000; // Large starting value
+            for(int i = 0; pathPoses.size(); i++) {
+                dist = calcDistance(pathPoses[i].pose.position.x,pathPoses[i].pose.position.y,
+                                    xCurrent, yCurrent
+                );
+                if (dist < closestDist){
+                    closestPoint = i;
+                    closestDist = dist;
+                }
+            }
         }
 
         void findLookAheadPoint(){
-
+            double closestDist = 1000000; // Large starting value
+            for(int i = 0; pathPoses.size(); i++) {
+                dist = calcDistance(pathPoses[i].pose.position.x,pathPoses[i].pose.position.y,
+                                    pathPoses[closestPoint].pose.position.x,pathPoses[closestPoint].pose.position.y);
+                if (abs(dist-lookAheadDistance) < closestDist){
+                    lookAheadPoint = i;
+                    closestDist = abs(dist-lookAheadDistance);
+                }
+            }
         }
 
         void transformPointToVehicleCoordSys(){
+            // y'= -*sin(theta)*x + cos(theta)*y
+            deltaY = -sin(currentHeading)*pathPoses[i].pose.position.x + cos(currentHeading)*pathPoses[i].pose.position.y;
+        }
 
+        void setSteeringCommand(){
+            steeringCommand = steeringAngle / MAX_STEERING_ANGLE;
+            if (steeringCommand > 1.0)
+                steeringCommand = 1.0;
+            else if (steeringCommand < -1.0)
+                steeringCommand = -1.0;
         }
 
         void calcSteeringAngle(){
+            steeringAngle = 2*deltaY/pow(lookAheadDistance,2);
+            setSteeringCommand();
+        }
 
+        void sendsteeringCommand(){
+            std::string steeringString = std::to_string(steeringCommand);
+            std::string steeringMessage = "S" + steeringString;
+            const char* steeringMessagePtr = steeringMessage.c_str();
+            write(serial_port, steeringMessagePtr, strlen(steeringMessagePtr));
+            ROS_INFO_STREAM("Message sent: " << steeringMessage);
         }
 
         void main_loop(const ros::TimerEvent &)
@@ -71,6 +137,7 @@ class PurePursuit
             findLookAheadPoint();
             transformPointToVehicleCoordSys();
             calcSteeringAngle();
+            sendsteeringCommand();
         }
 
     private:
@@ -81,9 +148,21 @@ class PurePursuit
         ros::Timer timer;
 };
 
+void configureSerialPort(){
+    if (serial_port < 0) {
+        ROS_STREAM_INFO("Error %i from open: %s\n", errno, strerror(errno));
+    }
+    if(tcgetattr(serial_port, &tty) != 0) {
+        ROS_STREAM_INFO("Error %i from tcgetattr: %s\n", errno, strerror(errno));
+    }
+    cfsetospeed(&tty, B115200);
+}
+
 int main(int argc, char** argv){
+    configureSerialPort()
     ros::init(argc,argv, "pure_pursuit");
     PurePursuit controller;
     ros::spin();
+    close(serial_port);
     return 0;
 }
