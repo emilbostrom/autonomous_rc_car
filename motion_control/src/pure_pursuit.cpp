@@ -84,6 +84,7 @@ class PurePursuit
         void findClosestPointToCar(){
             double dist;
             double closestDist = 1000000; // Large starting value
+            ROS_INFO_STREAM("Path size: " << pathPoses.size());
             for(int i = 0; pathPoses.size(); i++) {
                 dist = calcDistance(pathPoses[i].position.x,pathPoses[i].position.y,
                                     xCurrent, yCurrent
@@ -139,6 +140,7 @@ class PurePursuit
 
         void main_loop(const ros::TimerEvent &)
         {
+            ROS_INFO_STREAM("A loop");
             findClosestPointToCar();
             findLookAheadPoint();
             transformPointToVehicleCoordSys();
